@@ -1,0 +1,20 @@
+{
+  "version": "0.2.0",
+  "configurations": [{
+       "name": "Debug",
+       "type": "python",
+       "request": "launch",
+       "module": "streamlit",
+       "env": {
+           "STREAMLIT_APP": "chat.py",
+           "STREAMLIT_ENV": "development",
+           "PYTHONPATH": "${workspaceRoot}/src",
+       },
+       "args": [
+           "run",
+           "chat.py"
+       ],
+       "jinja": true
+   }
+  ]
+}
