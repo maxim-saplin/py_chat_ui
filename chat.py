@@ -1,9 +1,14 @@
 import streamlit as st
 from logic import *
+from ui_helpers import *
 
 client = get_client()
 
 #### UI starts here
+
+# Right align token counter
+right_align_2nd_col()
+hide_streamlit_menu()
 
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = model
@@ -11,30 +16,6 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# Right align token counter
-st.markdown(
-    """
-    <style>
-        div[data-testid="column"]:nth-of-type(2)
-        {
-            text-align: end;
-        } 
-    </style>
-    """,unsafe_allow_html=True
-)
-
-# Hide streamlit top right menu
-st.markdown("""
-    <style>
-        .reportview-container {
-            margin-top: -2em;
-        }
-        #MainMenu {visibility: hidden;}
-        .stDeployButton {display:none;}
-        footer {visibility: hidden;}
-        #stDecoration {display:none;}
-    </style>
-""", unsafe_allow_html=True)
 
 col1, col2= st.columns(2)
 
