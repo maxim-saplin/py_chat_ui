@@ -1,42 +1,7 @@
-import os
-from openai import OpenAI, AzureOpenAI
 import streamlit as st
-from dotenv import load_dotenv
-import tiktoken
+from logic import *
 
-load_dotenv()
-
-api_key = os.environ.get("OPENAI_API_KEY")
-api_type = os.environ.get("API_TYPE")
-api_version = os.environ.get("API_VERSION")
-api_base = os.environ.get("OPENAI_API_BASE")
-model = os.environ.get("MODEL")
-temperature = float(os.environ.get("TEMPERATURE"))
-
-encoding = tiktoken.get_encoding("cl100k_base")
-
-def num_tokens_from_messages(messages):
-    """Return the number of tokens used by a list of messages."""
-
-    if not messages: return 0
-
-    tokens_per_message = 4  # every message follows <|start|>{role/name}\n{content}<|end|>\n
-    tokens_per_name = -1  # if there's a name, the role is omitted
-
-    num_tokens = 0
-    for message in messages:
-        num_tokens += tokens_per_message
-        for key, value in message.items():
-            num_tokens += len(encoding.encode(value))
-            if key == "name":
-                num_tokens += tokens_per_name
-    num_tokens += 3  # every reply is primed with <|start|>assistant<|message|>
-    return num_tokens
-
-client = AzureOpenAI(api_key=api_key, 
-                     azure_endpoint=api_base, 
-                     api_version=api_version,
-                     azure_deployment=model) if api_type == "azure" else OpenAI(api_key=api_key)
+client = get_client()
 
 #### UI starts here
 
@@ -46,6 +11,7 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
+# Right align token counter
 st.markdown(
     """
     <style>
@@ -56,6 +22,19 @@ st.markdown(
     </style>
     """,unsafe_allow_html=True
 )
+
+# Hide streamlit top right menu
+st.markdown("""
+    <style>
+        .reportview-container {
+            margin-top: -2em;
+        }
+        #MainMenu {visibility: hidden;}
+        .stDeployButton {display:none;}
+        footer {visibility: hidden;}
+        #stDecoration {display:none;}
+    </style>
+""", unsafe_allow_html=True)
 
 col1, col2= st.columns(2)
 
