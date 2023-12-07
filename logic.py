@@ -3,6 +3,7 @@ import os
 from enum import Enum
 from dotenv import load_dotenv
 import tiktoken
+import pickle
 
 load_dotenv()
 
@@ -20,6 +21,54 @@ env_api_version = os.environ.get("API_VERSION")
 env_api_base = os.environ.get("OPENAI_API_BASE")
 env_model = os.environ.get("MODEL")
 env_temperature = float(os.environ.get("TEMPERATURE"))
+
+class Model:
+    def __init__(self, name, api_key, api_type, api_version, api_base, temperature):
+        self.name = name
+        self.api_key = api_key
+        self.api_type = api_type
+        self.api_version = api_version
+        self.api_base = api_base
+        self.temperature = temperature
+
+class ModelRepository:
+    def __init__(self):
+        self.models = []
+        if env_model:
+            self.models.append(Model('(env) ' + env_model, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature))
+
+    def load(self):
+        try:
+            with open('models.dat', 'rb') as f:
+                self.models = pickle.load(f)
+        except FileNotFoundError:
+            pass
+
+    def add(self, model):
+        self.models.append(model)
+        self.save()
+
+    def delete(self, model_name):
+        self.models = [model for model in self.models if model.name != model_name]
+        self.save()
+
+    def update(self, model):
+        for i, m in enumerate(self.models):
+            if m.name == model.name:
+                self.models[i] = model
+                break
+        self.save()
+
+    def list(self):
+        return [model.name for model in self.models]
+
+    def save(self):
+        with open('models.dat', 'wb') as f:
+            pickle.dump(self.models, f)
+
+model_repository = ModelRepository()
+model_repository.load()
+
 
 def get_client():
     return AzureOpenAI(api_key=env_api_key, 

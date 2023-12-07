@@ -25,7 +25,6 @@ class MenuOptions(Enum):
 with st.sidebar:
     selected = option_menu(None, [MenuOptions.NEW.value, 'Some chat 1', 'Some chat 2', MenuOptions.SETTINGS.value], 
         icons=['plus', '','', 'gear'], menu_icon='cast', default_index=1)
-    selected
 
 col1, col2= st.columns(2)
 
@@ -55,14 +54,25 @@ if selected == MenuOptions.NEW.value:
     st.button("Send message", type="primary")
 #### Settings
 elif selected == MenuOptions.SETTINGS.value:
-    model_selected = st.selectbox('Model', ('(env): ' + env_model, 'Cust model 2'))
-    api_type = st.selectbox('API Type', [option.value for option in ApiTypeOptions])
-    if api_type == ApiTypeOptions.OPENAI.value:
-        st.text_input('API Key', env_api_key)
-    elif api_type == ApiTypeOptions.AZURE.value:
-        st.text_input('API Key', env_api_key)
-        st.text_input('API Version', env_api_version)
-        st.text_input('API Base', env_api_base)
+    st.header('Manage Models')
+    model_selected = st.selectbox('Select Model', ['Add New Model'] + [model.name for model in model_repository.models])
+    is_env_model = model_selected.startswith('(env)')
+    is_new_model = model_selected == 'Add New Model'
+    st.subheader('Add New Model' if is_new_model else 'Environment Model Settings' if is_env_model else 'Custom Model Settings')
+    name = st.text_input('Model Name', value=model_selected if not is_new_model else '', disabled=not is_new_model)
+    api_key = st.text_input('API Key', env_api_key, disabled=is_env_model)
+    api_type = st.selectbox('API Type', [option.value for option in ApiTypeOptions], disabled=is_env_model)
+    api_version = st.text_input('API Version', env_api_version, disabled=is_env_model)
+    api_base = st.text_input('API Base', env_api_base, disabled=is_env_model)
+    temperature = st.slider('Temperature', 0.0, 1.0, 0.7, 0.01, disabled=is_env_model)
+    if is_new_model and st.button('Add Model'):
+        model_repository.add(Model(name, api_key, api_type, api_version, api_base, temperature))
+        model_selected = st.selectbox('Select Model', ['Add New Model'] + [model.name for model in model_repository.models]) # Update the model list after adding a new model
+        st.rerun()
+    elif not is_env_model and st.button('Delete Model'):
+        model_repository.delete(model_selected)
+        model_selected = st.selectbox('Select Model', ['Add New Model'] + [model.name for model in model_repository.models]) # Update the model list after deleting a model
+        st.rerun()
 #### CHAT
 else:
     if prompt := st.chat_input('What is up?'):
