@@ -1,4 +1,5 @@
 streamlit
+streamlit-option-menu
 openai
 python-dotenv
 tiktoken

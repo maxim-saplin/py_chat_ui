@@ -9,14 +9,14 @@ api_key = os.environ.get("OPENAI_API_KEY")
 api_type = os.environ.get("API_TYPE")
 api_version = os.environ.get("API_VERSION")
 api_base = os.environ.get("OPENAI_API_BASE")
-model = os.environ.get("MODEL")
-temperature = float(os.environ.get("TEMPERATURE"))
+env_model = os.environ.get("MODEL")
+env_temperature = float(os.environ.get("TEMPERATURE"))
 
 def get_client():
     return AzureOpenAI(api_key=api_key, 
                      azure_endpoint=api_base, 
                      api_version=api_version,
-                     azure_deployment=model) if api_type == "azure" else OpenAI(api_key=api_key)
+                     azure_deployment=env_model) if api_type == "azure" else OpenAI(api_key=api_key)
 
 encoding = tiktoken.get_encoding("cl100k_base")
 
