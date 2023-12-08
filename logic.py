@@ -183,6 +183,14 @@ class ChatSessionManager:
                     self.sessions.append(session)
                 except (EOFError, pickle.UnpicklingError):
                     continue
+    def delete(self, session_id: int) -> None:
+        session = self.get_session_by_id(session_id)
+        if session:
+            self.sessions.remove(session)
+            if os.path.exists(session.file_path):
+                os.remove(session.file_path)
+            if os.path.exists(session.messages_file_path):
+                os.remove(session.messages_file_path)
 
 session_manager = ChatSessionManager()
 
