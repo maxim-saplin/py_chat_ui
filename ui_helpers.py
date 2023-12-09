@@ -7,6 +7,11 @@ def right_align_2nd_col():
         div[data-testid="column"]:nth-of-type(2)
         {
             text-align: end;
+            position: fixed;
+            z-index: 999;
+            top: 40px;
+            right: 50px;
+            background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.8) 100%);
         } 
     </style>
     """,unsafe_allow_html=True
