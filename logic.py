@@ -1,32 +1,12 @@
 from openai import OpenAI, AzureOpenAI
 import os
 import datetime
-from enum import Enum
-from dotenv import load_dotenv
 import tiktoken
 import pickle
 import glob
+from env_vars import *
 
-load_dotenv()
-
-DATA_FOLDER: str = ".data"
-MODELS_FILE_NAME: str = "models.dat"
-CHATS_FOLDER: str = "chats"
-
-class ApiTypeOptions(Enum):
-    AZURE = 'Azure'
-    OPENAI = 'OpenAI'
-
-env_api_key: str | None = os.environ.get("OPENAI_API_KEY")
-env_api_type: str | None = os.environ.get("API_TYPE")
-if env_api_type not in ApiTypeOptions.__members__:
-    env_api_type: str = ApiTypeOptions.AZURE.value
-else:
-    env_api_type: str = ApiTypeOptions[env_api_type].value
-env_api_version: str | None = os.environ.get("API_VERSION")
-env_api_base: str | None = os.environ.get("OPENAI_API_BASE")
-env_model_name: str | None = os.environ.get("MODEL")
-env_temperature: float = float(os.environ.get("TEMPERATURE", "0.0"))
+user_dir: str = None;
 
 class Model:
     def __init__(self, name: str, api_key: str, api_type: str, api_version: str, api_base: str, temperature: float, is_env: bool = False):
@@ -45,7 +25,7 @@ class ModelRepository:
 
     def load(self) -> None:
         try:
-            with open(os.path.join(DATA_FOLDER, MODELS_FILE_NAME), 'rb') as f:
+            with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'rb') as f:
                 self.models, self.last_used_model = pickle.load(f)
         except FileNotFoundError:
             pass
@@ -90,23 +70,18 @@ class ModelRepository:
         return [model.name for model in self.models]
 
     def save(self) -> None:
-        with open(os.path.join(DATA_FOLDER, MODELS_FILE_NAME), 'wb') as f:
+        with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
             pickle.dump((self.models, self.last_used_model), f)
-
-
-model_repository = ModelRepository()
-if env_model_name:
-    model_repository.add_env(env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
-model_repository.load()
 
 class ChatSession:
     def __init__(self, session_id: int, model: Model, title: str):
+        assert user_dir is not None, "user_dir must not be null"
         self.session_id: int = session_id
         self.model: Model = model
         self.title: str = title
         self.start_date: datetime.datetime = datetime.datetime.now()
         self.messages: list[dict] = []
-        base_file_path = os.path.join(DATA_FOLDER, CHATS_FOLDER, f"{self.start_date.strftime('%Y%m%d%H%M%S%f')}_{self.session_id}")
+        base_file_path = os.path.join(env_data_folder, user_dir, CHATS_FOLDER, f"{self.start_date.strftime('%Y%m%d%H%M%S%f')}_{self.session_id}")
         self.file_path: str = f"{base_file_path}.pkl"
         self.messages_file_path: str = f"{base_file_path}_messages.pkl"
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
@@ -156,6 +131,7 @@ class ChatSession:
 
 class ChatSessionManager:
     def __init__(self):
+        assert user_dir is not None, "user_dir must be set before initializing ChatSessionManager"
         self.sessions: list[ChatSession] = []
         self.load_sessions()
 
@@ -175,7 +151,7 @@ class ChatSessionManager:
         return None
 
     def load_sessions(self) -> None:
-        chat_files = glob.glob(os.path.join(DATA_FOLDER, CHATS_FOLDER, "*.pkl"))
+        chat_files = glob.glob(os.path.join(env_data_folder, user_dir, CHATS_FOLDER, "*.pkl"))
         for file_path in chat_files:
             if not file_path.endswith("_messages.pkl"):
                 try:
@@ -191,8 +167,6 @@ class ChatSessionManager:
                 os.remove(session.file_path)
             if os.path.exists(session.messages_file_path):
                 os.remove(session.messages_file_path)
-
-session_manager = ChatSessionManager()
 
 def create_client(model: Model) -> OpenAI | AzureOpenAI:
     if model.api_type == ApiTypeOptions.AZURE.value:
@@ -222,3 +196,33 @@ def num_tokens_from_messages(messages: list[dict]) -> int:
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|im_start|>assistant<|im_sep|>
     return num_tokens
+
+
+
+model_repository: ModelRepository = None;
+session_manager: ChatSessionManager = None
+
+def init(user_direrctory: str) -> None:
+    global user_dir
+    global model_repository
+    global session_manager
+    if not user_direrctory.isidentifier():
+        raise ValueError("Invalid user directory name; It must start with a letter (a-z, A-Z) or an underscore () and can be followed by any number of letters, digits (0-9), or underscores")
+    user_dir = user_direrctory
+    model_repository = ModelRepository()
+    if env_model_name:
+        model_repository.add_env(env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
+    model_repository.load()
+    session_manager = ChatSessionManager()
+
+
+# def is_init() -> bool:
+#     """Check if the system has been initialized."""
+#     return user_dir is not None and model_repository is not None and session_manager is not None
+
+# def reset() -> None:
+#     """Reset the global variables to their default state, e.g., when a logout happens."""
+#     global user_dir
+#     user_dir = None
+#     model_repository = None
+#     session_manager = None

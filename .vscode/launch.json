@@ -12,7 +12,7 @@
        },
        "args": [
            "run",
-           "chat.py"
+           "main.py"
        ],
        "jinja": true
    }

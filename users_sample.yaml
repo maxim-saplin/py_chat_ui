@@ -1,0 +1,18 @@
+credentials:
+  usernames:
+    user_1:
+      # email: user_1@example.com
+      # name: User_1
+      # password is user_1, generated via `python3 generate_pass.py --username user_1 --password user_1`
+      password: $2b$12$iuibk2OSLiR9zSb4zV.mrO6iMIDY2B/P1pbVlHx/J/fXanVgwDJ6a
+    user_2:
+      # email: user_2@example.com
+      # name: User_2
+      password: $2b$12$ykDLkGvvmCGDHnEaO5EW6O44dHFgHeQIwO0J1wSqihn4ka8ASiTjC
+cookie:
+  expiry_days: 30
+  key: some_signature_key # Must be string
+  name: some_cookie_name
+preauthorized:
+  emails:
+  - test@gmail.com

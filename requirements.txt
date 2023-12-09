@@ -1,5 +1,6 @@
 streamlit
 streamlit-option-menu
+streamlit_authenticator
 openai
 python-dotenv
 tiktoken
