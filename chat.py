@@ -2,6 +2,7 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from enum import Enum
 import logic as lg
+import time
 from ui_helpers import *
 
 def show_chat(show_logout: callable) -> None:
@@ -20,6 +21,7 @@ def show_chat(show_logout: callable) -> None:
         'chat_session_id': None,
         'selected_model_name': None,
         'selected_menu': None,
+        'prompt_for_tokenizer': None
     }
     for key, default_value in session_state_defaults.items():
         if key not in st.session_state:
@@ -191,6 +193,15 @@ def show_chat(show_logout: callable) -> None:
             
     #### Chat
     else:
+        embed_chat_input_handler_js()
+
+        hide_form()
+        with st.form("hidden"):
+            txt = st.text_input("hidden prompt for tokenizer")
+            submitted = st.form_submit_button("Submit")
+            if submitted and txt:
+                st.session_state['prompt_for_tokenizer'] = txt
+                st.rerun()
 
         # Chat header
         if st.session_state['selected_menu'] not in [MenuOptions.NEW.value, MenuOptions.SETTINGS.value]:
@@ -206,7 +217,14 @@ def show_chat(show_logout: callable) -> None:
                 if session is not None:
                     model_name = getModel().name if getModel() else "No Model"
                     tokens = lg.num_tokens_from_messages(session.messages)
-                    st.write(f"{model_name} / {tokens}")
+                    if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
+                        prompt_tokens = lg.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
+                    else:
+                        prompt_tokens = 0
+                    if prompt_tokens > 0:
+                        st.write(f"{model_name} / {tokens} +{prompt_tokens}")
+                    else:
+                        st.write(f"{model_name} / {tokens}")
 
         if session != None:
             for message in session.messages:
@@ -219,10 +237,14 @@ def show_chat(show_logout: callable) -> None:
             #session.add_message({'role': 'assistant', 'content': full_response})
             st.rerun()
         if prompt := st.chat_input('What is up?'):
+            if prompt.endswith('\u200B'):
+                return
+
             # session.add_message({'role': 'user', 'content': prompt})
             with st.chat_message('user'):
                 st.markdown(prompt)
 
             with st.chat_message('assistant'):
                 get_ai_reply(get_client() , getModel(), session, prompt)
+            st.session_state['prompt_for_tokenizer'] = None
             st.rerun()
