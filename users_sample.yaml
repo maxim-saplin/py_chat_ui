@@ -12,7 +12,7 @@ credentials:
 cookie:
   expiry_days: 30
   key: some_signature_key # Must be string
-  name: some_cookie_name
+  name: strmlt-pld
 preauthorized:
   emails:
   - test@gmail.com

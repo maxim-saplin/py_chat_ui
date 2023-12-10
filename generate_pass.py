@@ -1,4 +1,4 @@
-import streamlit_authenticator as stauth
+import streamlit_authenticator_2 as stauth
 import yaml
 import sys
 import argparse

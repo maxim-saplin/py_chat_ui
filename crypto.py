@@ -14,12 +14,11 @@ def decrypt_data(data: bytes, encryption_key: bytes) -> bytes:
     return f.decrypt(data)
 
 
-def generate_fernet_key(password: str) -> bytes:
-    salt = b'salte_val'
+def generate_fernet_key(salt: str, password: str) -> bytes:
     kdf = PBKDF2HMAC(
         algorithm=hashes.SHA256(),
         length=32,
-        salt=salt,
+        salt=salt.encode(),
         iterations=100000,
         backend=default_backend()
     )

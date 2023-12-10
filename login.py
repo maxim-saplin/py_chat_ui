@@ -1,9 +1,10 @@
 import streamlit as st
-import streamlit_authenticator as stauth
+import streamlit_authenticator_2 as stauth
 import os
 import yaml
 from yaml.loader import SafeLoader
 from env_vars import env_data_folder, env_disable_auth
+from crypto import generate_fernet_key
 
 users_file: str = os.path.join(env_data_folder, 'users.yaml')
 
@@ -34,14 +35,21 @@ def authenticate() -> stauth.Authenticate | str | None:
         return 'dsaibled'
 
     authenticator = get_auth(config)
+
     #authenticator.login('Login', 'main')
-    # Init session vars without showing a login form as suggested by docs to avoid UI blocking
+    # Init session vars without showing a login to avoid UI blinking
+    if not st.session_state.get("cookie_checked", False):
+        authenticator._check_cookie()
+        st.session_state["cookie_checked"] = True
+        return None
+
     authenticator._check_cookie()
 
     if st.session_state.get("authentication_status", None):
         return authenticator
     else:
-        authenticator.login('Login', 'main')
+        # Call generate_fernet_key insternally, pass user name and passwrod and keep the key in server cookies
+        authenticator.login('Login', 'main', generate_fernet_key)
         if st.session_state["authentication_status"] is False:
             st.error('Username/password is incorrect')
         elif st.session_state["authentication_status"] is None:
@@ -58,6 +66,16 @@ def get_user_name() -> str | None:
     if env_disable_auth:
         return 'default_user'
     return st.session_state.get("username", None)
+
+def get_enc_key() -> bytes | None:
+    """
+    Get the extra payload from the session state if the user is authenticated.
+
+    Returns:
+        Optional[bytes]: The extra payload if present, otherwise None.
+    """
+    return st.session_state.get("auth_extra_payload", None)
+
 
 def show_logout(authenticator: stauth.Authenticate | str) -> None:
     assert isinstance(authenticator, (stauth.Authenticate, str)), "Parameter must be an instance of 'stauth.Authenticate' or 'str'"
