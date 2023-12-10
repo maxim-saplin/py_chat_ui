@@ -27,18 +27,3 @@ Provide your Azure/OpenAI model credentials (API key, deployment URL, etc.) here
 2. Install requirements with `pip3 install -r requirements.txt`.
 3. Run the application using `streamlit run chat.py`.
 4. Alternatively, debug in VSCode by pressing F5 and selecting the "Debug" configuration.
-
-## Solution Overview
-
-This Streamlit-based web application allows users to interact with AI models from OpenAI and Azure for a conversational experience. The backend is structured to handle user sessions, AI model management, and message storage, ensuring a seamless chat experience.
-
-### Backend
-
-- **Model Management**: The [Model](file:///private/var/user/src/py_chat_ui/logic.py#11%2C7-11%2C7) and `ModelRepository` classes handle AI model configurations.
-- **Session Handling**: The `ChatSession` and [ChatSessionManager](file:///private/var/user/src/py_chat_ui/logic.py#132%2C7-132%2C7) classes manage chat sessions and message persistence.
-- **Environment Variables**: Configurations are managed through environment variables, as outlined in `env_vars.py`.
-
-### Frontend
-
-- **Streamlit UI**: The `chat.py` script provides a user-friendly interface for interacting with the AI models and managing chat sessions.
-- **User Authentication**: The application supports user login to maintain separate chat histories.

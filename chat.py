@@ -1,8 +1,8 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from enum import Enum
-import logic as lg
-import time
+import user_state as state
+import utility as util
 from ui_helpers import *
 
 def show_chat(show_logout: callable) -> None:
@@ -10,7 +10,7 @@ def show_chat(show_logout: callable) -> None:
     right_align_2nd_col()
     hide_streamlit_menu()
 
-    class MenuOptions(Enum):
+    class NavMenuOptions(Enum):
         NEW = 'New'
         SETTINGS = 'Settings'
 
@@ -29,7 +29,7 @@ def show_chat(show_logout: callable) -> None:
 
     # Get Model
     if st.session_state['selected_model_name'] is None:
-        model = lg.model_repository.get_last_used_model()
+        model = state.model_repository.get_last_used_model()
         if model is not None:
             st.session_state['selected_model_name'] = model.name
         else:
@@ -37,7 +37,7 @@ def show_chat(show_logout: callable) -> None:
 
     # Get Chat session
     if st.session_state['chat_session_id'] is not None:
-        session = lg.session_manager.get_session_by_id(st.session_state['chat_session_id'])    
+        session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])    
     else: session = None
 
     # Set current view
@@ -45,38 +45,38 @@ def show_chat(show_logout: callable) -> None:
         if st.session_state['chat_session_id'] is not None and session is not None:
             st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
         else:
-            st.session_state['selected_menu'] = MenuOptions.NEW.value if lg.model_repository.models else MenuOptions.SETTINGS.value
+            st.session_state['selected_menu'] = NavMenuOptions.NEW.value if state.model_repository.models else NavMenuOptions.SETTINGS.value
 
     # Helpers to get model and OpenAI client
-    def getModel() -> lg.Model | None:
+    def getModel() -> state.Model | None:
         if st.session_state['selected_model_name']:
-            return lg.model_repository.get_model_by_name(st.session_state['selected_model_name'])
+            return state.model_repository.get_model_by_name(st.session_state['selected_model_name'])
         return None
 
-    def get_client() -> lg.OpenAI | lg.AzureOpenAI:
-        return lg.create_client(getModel())
+    def get_client() -> util.OpenAI:
+        return util.create_client(getModel())
 
     # App Navigation
     with st.sidebar:
         if show_logout:
             show_logout()
-        sessions = lg.session_manager.list_sessions()
+        sessions = state.session_manager.list_sessions()
         session_names = [f'{session.title} ({session.session_id})' for session in sessions]
-        menu_options =  session_names + [MenuOptions.SETTINGS.value] + [MenuOptions.NEW.value] if getModel() else session_names + [MenuOptions.SETTINGS.value]
+        menu_options =  session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value] if getModel() else session_names + [NavMenuOptions.SETTINGS.value]
         #previous_menu = st.session_state['selected_menu']
         st.session_state['selected_menu'] = option_menu(None, menu_options, 
             icons=[''] * len(session_names) + ['gear'] + ['plus'], menu_icon='cast', default_index= 0 if session_names else 1)
-        if st.session_state['selected_menu'] in [MenuOptions.NEW.value, MenuOptions.SETTINGS.value]:
+        if st.session_state['selected_menu'] in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
             st.session_state['chat_session_id'] = None
             session = None
         else:
             _, session_id_str = st.session_state['selected_menu'].rsplit(' (', 1)
             session_id = int(session_id_str.rstrip(')'))
             st.session_state['chat_session_id'] = session_id
-            session = lg.session_manager.get_session_by_id(st.session_state['chat_session_id'])
+            session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
 
 
-    def get_ai_reply(client: lg.OpenAI | lg.AzureOpenAI, model: lg.Model, session: lg.ChatSession, prompt: str | None) -> str:
+    def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSession, prompt: str | None) -> str:
         message_placeholder = st.empty()
         full_response = ''
 
@@ -101,21 +101,21 @@ def show_chat(show_logout: callable) -> None:
         return full_response
 
     #### Settings
-    if st.session_state['selected_menu'] == MenuOptions.SETTINGS.value:
+    if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
         st.title('Manage Models')
-        model_options = ['Add New Model'] + [model.name for model in lg.model_repository.models]
+        model_options = ['Add New Model'] + [model.name for model in state.model_repository.models]
         model_selected_index = model_options.index(st.session_state['selected_model_name']) if 'selected_model_name' in st.session_state and st.session_state['selected_model_name'] in model_options else 0
         model_selected_name = st.selectbox('Select Model', model_options, index=model_selected_index)
-        selected_model = next((model for model in lg.model_repository.models if model.name == model_selected_name), None)
+        selected_model = next((model for model in state.model_repository.models if model.name == model_selected_name), None)
         is_env_model = selected_model.is_env if selected_model else False
         
         is_new_model = model_selected_name == 'Add New Model'
         st.subheader('Add New Model' if is_new_model else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
 
-        api_type_options = [option.value for option in lg.ApiTypeOptions]
+        api_type_options = [option.value for option in state.ApiTypeOptions]
         api_type_index = api_type_options.index(selected_model.api_type) if selected_model else 0
         api_type = st.selectbox('API Type', api_type_options, index=api_type_index, disabled=is_env_model, on_change=lambda: st.rerun())
-        is_openai_type = api_type == lg.ApiTypeOptions.OPENAI.value
+        is_openai_type = api_type == state.ApiTypeOptions.OPENAI.value
 
         name = st.text_input('Model Name', value=model_selected_name if not is_new_model else '', disabled=is_env_model)
         api_key = st.text_input('API Key', selected_model.api_key if selected_model else '', disabled=is_env_model)
@@ -142,8 +142,8 @@ def show_chat(show_logout: callable) -> None:
         
         if is_new_model:
             if st.button('Add Model') and not errors:
-                model = lg.Model(name, api_key, api_type, api_version, api_base, temperature)
-                lg.model_repository.add(model)
+                model = state.Model(name, api_key, api_type, api_version, api_base, temperature)
+                state.model_repository.add(model)
                 st.success('Model added successfully!')
                 st.session_state['selected_model_name'] = model.name 
                 st.rerun()
@@ -156,21 +156,21 @@ def show_chat(show_logout: callable) -> None:
                     selected_model.api_version = api_version
                     selected_model.api_base = api_base
                     selected_model.temperature = temperature
-                    lg.model_repository.update(selected_model)
+                    state.model_repository.update(selected_model)
                     st.session_state['selected_model_name'] = selected_model.name 
                     st.success('Model updated successfully!')
                     st.rerun()
                 if st.button('Delete Model'):
-                    lg.delete(selected_model.name)
+                    state.delete(selected_model.name)
                     st.success('Model deleted successfully!')
-                    last_model = lg.model_repository.get_last_used_model()
+                    last_model = state.model_repository.get_last_used_model()
                     st.session_state['selected_model_name'] = last_model.name if last_model else None
                     st.rerun()
                 
     #### Starting a chat
-    elif st.session_state['selected_menu'] == MenuOptions.NEW.value:
+    elif st.session_state['selected_menu'] == NavMenuOptions.NEW.value:
         st.title('New Chat')
-        model_options = [model.name for model in lg.model_repository.models]
+        model_options = [model.name for model in state.model_repository.models]
         selected_model_index = model_options.index(st.session_state['selected_model_name']) if st.session_state['selected_model_name'] in model_options else 0
         st.session_state['selected_model_name'] = st.selectbox('Model', model_options, index=selected_model_index)
         st.session_state['system_message'] = st.text_area('System message', st.session_state['system_message'])
@@ -180,15 +180,15 @@ def show_chat(show_logout: callable) -> None:
         if prompt:
             title = prompt.split()[:5]
             model = getModel()
-            session = lg.session_manager.create_session(model, ' '.join(title))
+            session = state.session_manager.create_session(model, ' '.join(title))
             if st.session_state['system_message']:
                 session.add_message({'role': 'system', 'content': st.session_state['system_message']})
             session.add_message({'role': 'user', 'content': prompt}) 
             st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
             st.session_state['chat_session_id'] = session.session_id
             model.temperature = temperature
-            lg.model_repository.update(model)
-            lg.model_repository.set_last_used_model(model.name)
+            state.model_repository.update(model)
+            state.model_repository.set_last_used_model(model.name)
             st.rerun()
             
     #### Chat
@@ -202,21 +202,21 @@ def show_chat(show_logout: callable) -> None:
                 st.rerun()
 
         # Chat header
-        if st.session_state['selected_menu'] not in [MenuOptions.NEW.value, MenuOptions.SETTINGS.value]:
+        if st.session_state['selected_menu'] not in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
             col1, col2 = st.columns(2)
             with col1:
                 if st.button('Delete Chat'):
-                    lg.session_manager.delete(session.session_id)
+                    state.session_manager.delete(session.session_id)
                     st.success('Chat deleted successfully!')
-                    st.session_state['selected_menu'] = MenuOptions.NEW.value
+                    st.session_state['selected_menu'] = NavMenuOptions.NEW.value
                     st.session_state['chat_session_id'] = None
                     st.rerun()
             with col2:
                 if session is not None:
                     model_name = getModel().name if getModel() else "No Model"
-                    tokens = lg.num_tokens_from_messages(session.messages)
+                    tokens = util.num_tokens_from_messages(session.messages)
                     if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
-                        prompt_tokens = lg.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
+                        prompt_tokens = util.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
                     else:
                         prompt_tokens = 0
                     if prompt_tokens > 0:

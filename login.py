@@ -81,7 +81,7 @@ def show_logout(authenticator: stauth.Authenticate | str) -> None:
     assert isinstance(authenticator, (stauth.Authenticate, str)), "Parameter must be an instance of 'stauth.Authenticate' or 'str'"
     if not isinstance(authenticator, stauth.Authenticate):
         return
-    authenticator.logout(f'Logout: *{st.session_state["username"]}*', 'main', key='unique_key')
+    authenticator.logout(f'Logout: *{st.session_state["username"]}*', 'main')
 
 
 
