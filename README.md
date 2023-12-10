@@ -3,10 +3,13 @@
 ## Features
 
 - **Token counter**: get number of tokens in the dialog and in the prompt being typed 
-- **AI Model Integration**: Connect to OpenAI and Azure AI models for generating chat responses.
-- **User Management**: Supports user authentication and individual user data storage.
+- **Azure and OpenAI supported**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
 - **Model Customization**: Users can add, update, and delete AI models with custom settings.
-- **Session Persistence**: Chat sessions are saved and can be revisited or resumed.
+- **Single and Multi user**: Anonymous auth (single user) OR user authentication against a local YAML user DB (pairs of usernames/password hashes).
+- **Chat Persistence**: Dialogs are saved on the server in flies and can be access acros different devices.
+- **Data encryption**: All user data (chat dialogs and model settings) is encrypted using hashed keys (stored in users server-only cookies)
+  - Loosing user creds means loosing stored user data. No pasword change is supported!
+  - Protection against leaking sotred files. If the attacker can debug the server OR can steal cookies the encryption keys can be exposed
 - **Environment Configuration**: Easy setup with environment variables or `.env` file.
 - **Local and Debug Running**: Run the application locally or debug with VSCode.
 

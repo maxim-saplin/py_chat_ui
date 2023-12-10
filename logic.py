@@ -4,9 +4,14 @@ import datetime
 import tiktoken
 import pickle
 import glob
+from cryptography.fernet import InvalidToken
+from crypto import *
 from env_vars import *
 
-user_dir: str = None;
+# Current users home holder to store all data, must be set
+user_dir: str = None
+# Encryption key used to encrypt/decryp all user data coming to/from disk
+encryption_key: bytes = None
 
 class Model:
     def __init__(self, name: str, api_key: str, api_type: str, api_version: str, api_base: str, temperature: float, is_env: bool = False):
@@ -26,9 +31,12 @@ class ModelRepository:
     def load(self) -> None:
         try:
             with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'rb') as f:
-                self.models, self.last_used_model = pickle.load(f)
+                encrypted_data = f.read()
+                self.models, self.last_used_model = pickle.loads(decrypt_data(encrypted_data, encryption_key))
         except FileNotFoundError:
             pass
+        except InvalidToken:
+            raise Exception("Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
 
     def add_env(self, env_model: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float) -> None:
         model = Model(env_model, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature, True)
@@ -71,7 +79,8 @@ class ModelRepository:
 
     def save(self) -> None:
         with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
-            pickle.dump((self.models, self.last_used_model), f)
+            encrypted_data = encrypt_data(pickle.dumps((self.models, self.last_used_model)), encryption_key)
+            f.write(encrypted_data)
 
 class ChatSession:
     def __init__(self, session_id: int, model: Model, title: str):
@@ -94,7 +103,11 @@ class ChatSession:
         if not os.path.exists(self.file_path):
             self.save()
         with open(self.messages_file_path, 'ab') as f:
-            pickle.dump((datetime.datetime.now(), message), f)
+            message_data = pickle.dumps((datetime.datetime.now(), message))
+            encrypted_data = encrypt_data(message_data, encryption_key)
+            # Prepend the length of the encrypted data as a 4-byte integer
+            f.write(len(encrypted_data).to_bytes(4, 'big'))
+            f.write(encrypted_data)
 
     def save(self) -> None:
         with open(self.file_path, 'wb') as f:
@@ -104,30 +117,45 @@ class ChatSession:
                 'title': self.title,
                 'start_date': self.start_date
             }
-            pickle.dump(data, f)
+            encrypted_data = encrypt_data(pickle.dumps(data), encryption_key)
+            f.write(encrypted_data)
 
     @classmethod
     def from_file(cls, file_path: str, model_repository: ModelRepository) -> 'ChatSession':
-        with open(file_path, 'rb') as f:
-            data = pickle.load(f)
-            model_name = data['model_name']
-            model = model_repository.get_model_by_name(model_name)
-            if model is None:
-                model = model_repository.last_used_model
-            chat_session = cls(data['session_id'], model, data['title'])
-            chat_session.start_date = data['start_date']
-            chat_session.file_path = file_path
-            messages_file_path = f"{os.path.splitext(file_path)[0]}_messages.pkl"
-            if os.path.exists(messages_file_path):
-                with open(messages_file_path, 'rb') as mf:
-                    while True:
-                        try:
-                            _, message = pickle.load(mf)
-                            chat_session.messages.append(message)
-                        except EOFError:
-                            break
-            chat_session.messages_file_path = messages_file_path
-            return chat_session
+        try:
+            with open(file_path, 'rb') as f:
+                encrypted_data = f.read()
+                data = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                model_name = data['model_name']
+                model = model_repository.get_model_by_name(model_name)
+                if model is None:
+                    model = model_repository.last_used_model
+                chat_session = cls(data['session_id'], model, data['title'])
+                chat_session.start_date = data['start_date']
+                chat_session.file_path = file_path
+                messages_file_path = f"{os.path.splitext(file_path)[0]}_messages.pkl"
+                if os.path.exists(messages_file_path):
+                    with open(messages_file_path, 'rb') as mf:
+                        while True:
+                            try:
+                                # Read the length of the encrypted message
+                                length_bytes = mf.read(4)
+                                if not length_bytes:
+                                    break  # No more messages
+                                length = int.from_bytes(length_bytes, 'big')
+                                # Now read the exact length of the message
+                                encrypted_message_data = mf.read(length)
+                                _, message = pickle.loads(decrypt_data(encrypted_message_data, encryption_key))
+                                chat_session.messages.append(message)
+                            except EOFError:
+                                break
+                            except Exception as e:
+                                raise e
+                chat_session.messages_file_path = messages_file_path
+                return chat_session
+        except InvalidToken:
+            # Handle the case where the session data cannot be decrypted
+            raise ValueError("Unable to decrypt the session data. The encryption key may be incorrect or the data is corrupted.")
 
 class ChatSessionManager:
     def __init__(self):
@@ -199,30 +227,22 @@ def num_tokens_from_messages(messages: list[dict]) -> int:
 
 
 
-model_repository: ModelRepository = None;
+model_repository: ModelRepository = None
 session_manager: ChatSessionManager = None
 
-def init(user_direrctory: str) -> None:
+def init(user_direrctory: str, enc_key) -> None:
     global user_dir
+    global encryption_key
     global model_repository
     global session_manager
     if not user_direrctory.isidentifier():
         raise ValueError("Invalid user directory name; It must start with a letter (a-z, A-Z) or an underscore () and can be followed by any number of letters, digits (0-9), or underscores")
+    if not enc_key:
+        raise ValueError("Encryption key is not set.")
     user_dir = user_direrctory
+    encryption_key = enc_key
     model_repository = ModelRepository()
     if env_model_name:
         model_repository.add_env(env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
     model_repository.load()
     session_manager = ChatSessionManager()
-
-
-# def is_init() -> bool:
-#     """Check if the system has been initialized."""
-#     return user_dir is not None and model_repository is not None and session_manager is not None
-
-# def reset() -> None:
-#     """Reset the global variables to their default state, e.g., when a logout happens."""
-#     global user_dir
-#     user_dir = None
-#     model_repository = None
-#     session_manager = None

@@ -4,3 +4,4 @@ streamlit_authenticator
 openai
 python-dotenv
 tiktoken
+cryptography

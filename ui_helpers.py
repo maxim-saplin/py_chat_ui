@@ -57,7 +57,7 @@ setInterval(() => {
   const formInput = window.parent.document.querySelector('div[data-testid="stForm"] input');
   const formButton = window.parent.document.querySelector('div[data-testid="stForm"] button');
   if (originalTextArea && formInput && formButton) {
-    if (originalTextArea.value !== '' && originalTextArea.value !== previousValue) {
+    if (originalTextArea.value !== previousValue) {
       console.log("Chat input text changed");
       
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
