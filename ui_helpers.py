@@ -34,12 +34,20 @@ def hide_streamlit_menu():
     </style>
 """, unsafe_allow_html=True)
     
-def hide_form():
+def hide_tokinzer_workaround_form():
     st.markdown("""
     <style>
         div[data-testid="stForm"] {
+            height: 0px;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            border: 0;
             opacity: 0;
-            position: absolute;
+        }
+        section.main div[data-testid="stVerticalBlock"]:last-of-type,
+        section.main div[data-testid="stVerticalBlock"]:nth-last-of-type(2) {
+            height: 0;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -79,5 +87,5 @@ setInterval(() => {
 console.log("Chat input handler is active");
 </script>
     """
-    html(js)
+    html(js, 0, 0, False)
     #st.markdown(js,unsafe_allow_html=True)

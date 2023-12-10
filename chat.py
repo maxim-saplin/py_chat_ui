@@ -193,9 +193,7 @@ def show_chat(show_logout: callable) -> None:
             
     #### Chat
     else:
-        embed_chat_input_handler_js()
-
-        hide_form()
+        hide_tokinzer_workaround_form()
         with st.form("hidden"):
             txt = st.text_input("hidden prompt for tokenizer")
             submitted = st.form_submit_button("Submit")
@@ -234,17 +232,16 @@ def show_chat(show_logout: callable) -> None:
         if session.messages and session.messages[-1]['role'] == 'user':
             with st.chat_message('assistant'):
                 get_ai_reply(get_client() , getModel(), session, None)
-            #session.add_message({'role': 'assistant', 'content': full_response})
             st.rerun()
         if prompt := st.chat_input('What is up?'):
-            if prompt.endswith('\u200B'):
-                return
-
-            # session.add_message({'role': 'user', 'content': prompt})
+            st.session_state['prompt_for_tokenizer'] = None
             with st.chat_message('user'):
                 st.markdown(prompt)
 
             with st.chat_message('assistant'):
                 get_ai_reply(get_client() , getModel(), session, prompt)
-            st.session_state['prompt_for_tokenizer'] = None
             st.rerun()
+        else:
+           st.session_state['prompt_for_tokenizer'] = None 
+
+        embed_chat_input_handler_js()
