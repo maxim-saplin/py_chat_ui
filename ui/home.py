@@ -3,9 +3,10 @@ from streamlit_option_menu import option_menu
 from enum import Enum
 import logic.user_state as state
 import logic.utility as util
+from ui.chat_session import show_chat
 from ui.ui_helpers import *
 
-def show_chat(show_logout: callable) -> None:
+def show_home(show_logout: callable) -> None:
     # Right align token counter
     right_align_2nd_col()
     hide_streamlit_menu()
@@ -21,7 +22,6 @@ def show_chat(show_logout: callable) -> None:
         'chat_session_id': None,
         'selected_model_name': None,
         'selected_menu': None,
-        'prompt_for_tokenizer': None
     }
     for key, default_value in session_state_defaults.items():
         if key not in st.session_state:
@@ -48,13 +48,10 @@ def show_chat(show_logout: callable) -> None:
             st.session_state['selected_menu'] = NavMenuOptions.NEW.value if state.model_repository.models else NavMenuOptions.SETTINGS.value
 
     # Helpers to get model and OpenAI client
-    def getModel() -> state.Model | None:
+    def get_model() -> state.Model | None:
         if st.session_state['selected_model_name']:
             return state.model_repository.get_model_by_name(st.session_state['selected_model_name'])
         return None
-
-    def get_client() -> util.OpenAI:
-        return util.create_client(getModel())
 
     # App Navigation
     with st.sidebar:
@@ -62,7 +59,7 @@ def show_chat(show_logout: callable) -> None:
             show_logout()
         sessions = state.session_manager.list_sessions()
         session_names = [f'{session.title} ({session.session_id})' for session in sessions]
-        menu_options =  session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value] if getModel() else session_names + [NavMenuOptions.SETTINGS.value]
+        menu_options =  session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value] if get_model() else session_names + [NavMenuOptions.SETTINGS.value]
         #previous_menu = st.session_state['selected_menu']
         st.session_state['selected_menu'] = option_menu(None, menu_options, 
             icons=[''] * len(session_names) + ['gear'] + ['plus'], menu_icon='cast', default_index= 0 if session_names else 1)
@@ -74,31 +71,6 @@ def show_chat(show_logout: callable) -> None:
             session_id = int(session_id_str.rstrip(')'))
             st.session_state['chat_session_id'] = session_id
             session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
-
-
-    def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSession, prompt: str | None) -> str:
-        message_placeholder = st.empty()
-        full_response = ''
-
-        if prompt != None:
-            session.add_message({'role': 'user', 'content': prompt})
-        for response in client.chat.completions.create(
-                    model=model.name,
-                    temperature=model.temperature,
-                    messages=[
-                        {'role': m['role'], 'content': m['content']}
-                        for m in session.messages
-                    ],
-                    stream=True,
-                ):
-            if response.choices:
-                first_choice = response.choices[0]
-                if first_choice.delta and first_choice.delta.content:
-                    full_response += first_choice.delta.content
-            message_placeholder.markdown(full_response + '▌')
-        message_placeholder.markdown(full_response)
-        session.add_message({'role': 'assistant', 'content': full_response})
-        return full_response
 
     #### Settings
     if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
@@ -174,12 +146,12 @@ def show_chat(show_logout: callable) -> None:
         selected_model_index = model_options.index(st.session_state['selected_model_name']) if st.session_state['selected_model_name'] in model_options else 0
         st.session_state['selected_model_name'] = st.selectbox('Model', model_options, index=selected_model_index)
         st.session_state['system_message'] = st.text_area('System message', st.session_state['system_message'])
-        temperature = st.slider('Temperature', 0.0, 1.0, getModel().temperature, 0.01)
+        temperature = st.slider('Temperature', 0.0, 1.0, get_model().temperature, 0.01)
         prompt = st.text_area('Prompt', st.session_state['prompt'])
         st.button("Send message", type="primary")
         if prompt:
             title = prompt.split()[:5]
-            model = getModel()
+            model = get_model()
             session = state.session_manager.create_session(model, ' '.join(title))
             if st.session_state['system_message']:
                 session.add_message({'role': 'system', 'content': st.session_state['system_message']})
@@ -190,58 +162,39 @@ def show_chat(show_logout: callable) -> None:
             state.model_repository.update(model)
             state.model_repository.set_last_used_model(model.name)
             st.rerun()
+
+        # def start_new_chat(model_name, system_message, prompt, temperature):
+        #     st.title('New Chat')
+        #     model_options = [model.name for model in state.model_repository.models]
+        #     selected_model_index = model_options.index(model_name) if model_name in model_options else 0
+        #     model_name = st.selectbox('Model', model_options, index=selected_model_index)
+        #     system_message = st.text_area('System message', system_message)
+        #     temperature = st.slider('Temperature', 0.0, 1.0, get_model().temperature, 0.01)
+        #     prompt = st.text_area('Prompt', prompt)
+        #     st.button("Send message", type="primary")
+        #     if prompt:
+        #         title = prompt.split()[:5]
+        #         model = get_model()
+        #         session = state.session_manager.create_session(model, ' '.join(title))
+        #         if system_message:
+        #             session.add_message({'role': 'system', 'content': system_message})
+        #         session.add_message({'role': 'user', 'content': prompt}) 
+        #         st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
+        #         st.session_state['chat_session_id'] = session.session_id
+        #         model.temperature = temperature
+        #         state.model_repository.update(model)
+        #         state.model_repository.set_last_used_model(model.name)
+        #         st.rerun()
+
+        # # Call the function with current state values
+        # start_new_chat(
+        #     st.session_state['selected_model_name'],
+        #     st.session_state['system_message'],
+        #     st.session_state['prompt'],
+        #     get_model().temperature
+        # )
+            
             
     #### Chat
     else:
-        hide_tokinzer_workaround_form()
-        with st.form("hidden"):
-            txt = st.text_input("hidden prompt for tokenizer")
-            submitted = st.form_submit_button("Submit")
-            if submitted and txt:
-                st.session_state['prompt_for_tokenizer'] = txt
-                st.rerun()
-
-        # Chat header
-        if st.session_state['selected_menu'] not in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button('Delete Chat'):
-                    state.session_manager.delete(session.session_id)
-                    st.success('Chat deleted successfully!')
-                    st.session_state['selected_menu'] = NavMenuOptions.NEW.value
-                    st.session_state['chat_session_id'] = None
-                    st.rerun()
-            with col2:
-                if session is not None:
-                    model_name = getModel().name if getModel() else "No Model"
-                    tokens = util.num_tokens_from_messages(session.messages)
-                    if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
-                        prompt_tokens = util.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
-                    else:
-                        prompt_tokens = 0
-                    if prompt_tokens > 0:
-                        st.write(f"{model_name} / {tokens} +{prompt_tokens}")
-                    else:
-                        st.write(f"{model_name} / {tokens}")
-
-        if session != None:
-            for message in session.messages:
-                with st.chat_message(message['role']):
-                    st.markdown(message['content'])
-
-        if session.messages and session.messages[-1]['role'] == 'user':
-            with st.chat_message('assistant'):
-                get_ai_reply(get_client() , getModel(), session, None)
-            st.rerun()
-        if prompt := st.chat_input('What is up?'):
-            st.session_state['prompt_for_tokenizer'] = None
-            with st.chat_message('user'):
-                st.markdown(prompt)
-
-            with st.chat_message('assistant'):
-                get_ai_reply(get_client() , getModel(), session, prompt)
-            st.rerun()
-        else:
-           st.session_state['prompt_for_tokenizer'] = None 
-
-        embed_chat_input_handler_js()
+        show_chat(session, get_model())
