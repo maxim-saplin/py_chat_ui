@@ -1,8 +1,8 @@
 import streamlit as st
-from user_state import init
-from login import authenticate, show_logout, get_user_name, get_enc_key
-from chat import show_chat
-from crypto import *
+from logic.user_state import init
+from ui.login import authenticate, show_logout, get_user_name, get_enc_key
+from ui.chat import show_chat
+from logic.crypto import *
 
 st.set_page_config(
     page_title="Py Chat",

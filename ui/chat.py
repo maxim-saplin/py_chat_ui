@@ -1,9 +1,9 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
 from enum import Enum
-import user_state as state
-import utility as util
-from ui_helpers import *
+import logic.user_state as state
+import logic.utility as util
+from ui.ui_helpers import *
 
 def show_chat(show_logout: callable) -> None:
     # Right align token counter

@@ -21,6 +21,25 @@ Provide your Azure/OpenAI model credentials (API key, deployment URL, etc.) here
 
 `DISABLE_AUTH="False"` - If set to [True](file:///private/var/user/src/py_chat_ui/README.md#7%2C29-7%2C29), no login page will be shown, and all data will be stored under `$DATA_DIR/default_user`.
 
+## Set-up user creds
+
+`users.yaml` storder under `$DATA_DIR` stores usernames and hashes that are used to authenticate and allow user in. Make changes to this file in prod to make adjustment to who and how can access the app.
+
+1. Generate Credentials:
+- Run generate_pass.py.
+  `python generate_pass.py --username <username> --password <password>`
+- Input a username and password when prompted.
+- Copy the output (username and hashed password).
+
+2. Edit users.yaml:
+- Open users.yaml.
+- Add a new entry with the generated username and hashed password.
+
+3. Save and Test:
+- Save users.yaml.
+- Restart the application.
+- Log in with the new credentials to test.
+
 ## Running Locally
 
 1. Set OpenAI API credentials as environment variables or within the `.env` file (refer to `.env.template` for an example).

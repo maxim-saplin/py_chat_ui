@@ -3,8 +3,8 @@ import streamlit_authenticator_2 as stauth
 import os
 import yaml
 from yaml.loader import SafeLoader
-from env_vars import env_data_folder, env_disable_auth
-from crypto import generate_fernet_key
+from logic.env_vars import env_data_folder, env_disable_auth
+from logic.crypto import generate_fernet_key
 
 users_file: str = os.path.join(env_data_folder, 'users.yaml')
 

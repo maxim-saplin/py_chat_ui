@@ -3,8 +3,8 @@ import datetime
 import pickle
 import glob
 from cryptography.fernet import InvalidToken
-from crypto import *
-from env_vars import *
+from logic.crypto import *
+from logic.env_vars import *
 
 # Current users home holder to store all data, must be set
 user_dir: str = None
