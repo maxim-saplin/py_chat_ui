@@ -46,3 +46,12 @@ Provide your Azure/OpenAI model credentials (API key, deployment URL, etc.) here
 2. Install requirements with `pip3 install -r requirements.txt`.
 3. Run the application using `streamlit run chat.py`.
 4. Alternatively, debug in VSCode by pressing F5 and selecting the "Debug" configuration.
+
+## Running in Docker
+
+Start Docker Desktop and run command in terminal, after teh cintainer is started you can access the app on localhost:8501
+
+```
+docker build -t py-chat-ui .
+docker run -p 8501:8501 py-chat-ui
+```
