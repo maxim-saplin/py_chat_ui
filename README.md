@@ -13,13 +13,26 @@
 - **Environment Configuration**: Easy setup with environment variables or `.env` file.
 - **Local and Debug Running**: Run the application locally or debug with VSCode.
 
-## .env
+## Evironment variables
 
-Provide your Azure/OpenAI model credentials (API key, deployment URL, etc.) here. Users can also add their credentials in the web UI.
+You can configure the app either via setting environment variables or puttin values into `.env` file (see `.env.template` for an example).
 
-`DATA_DIR=".data"` - Directory where all conversations and model settings will be saved. Each user will have a `$username` subfolder.
+| Environment Variable | Description | Default Value |
+|----------------------|-------------|---------------|
+| `OPENAI_API_KEY`     | The API key for OpenAI or Azure | None |
+| `API_TYPE`           | The type of API to use (OpenAI or Azure) | None |
+| `API_VERSION`        | The version of the API | None |
+| `OPENAI_API_BASE`    | The base URL for the OpenAI API | None |
+| `ALIAS`              | The alias for the model | None |
+| `MODEL`              | The name of the model | None |
+| `TEMPERATURE`        | The temperature setting for the AI model | 0.0 |
+| `DATA_DIR`           | The directory where data will be stored | ".data" |
+| `DISABLE_AUTH`       | Whether to disable user authentication | "False" |
 
-`DISABLE_AUTH="False"` - If set to [True](file:///private/var/user/src/py_chat_ui/README.md#7%2C29-7%2C29), no login page will be shown, and all data will be stored under `$DATA_DIR/default_user`.
+**Remarks, notes:**
+- Providing  Azure/OpenAI model credentials (API key, deployment URL, etc.) via environment variables is not the only option. Users can also add their credentials in the Web UI, those creds will be encrypted and stored in `models.dat` file
+- `DATA_DIR` - that's where all conversations and model settings will be saved. Each user will have a `$username` subfolder.
+- `DISABLE_AUTH` - if set to [True], no login page will be shown, and all data will be stored under `$DATA_DIR/default_user`.
 
 ## Set-up user creds
 

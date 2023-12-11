@@ -61,19 +61,20 @@ def show_chat(session: state.ChatSession, model: state.Model):
 
     if session != None:
         for message in session.messages:
-            with st.chat_message(message['role']):
+            with st.chat_message(message['role'], 
+                    avatar='ui/ai.png' if message['role'] == 'assistant' else ('ui/user.png' if message['role'] == 'user' else None)):
                 st.markdown(message['content'])
 
     if session.messages and session.messages[-1]['role'] == 'user':
-        with st.chat_message('assistant'):
+        with st.chat_message('assistant', avatar=st.image('ui/ai.png')):
             get_ai_reply(util.create_client(model) , model, session, None)
         st.rerun()
     if prompt := st.chat_input('What is up?'):
         st.session_state['prompt_for_tokenizer'] = None
-        with st.chat_message('user'):
+        with st.chat_message('user', avatar=st.image('ui/user.png')):
             st.markdown(prompt)
 
-        with st.chat_message('assistant'):
+        with st.chat_message('assistant', avatar=st.image('ui/ai.png')):
             get_ai_reply(util.create_client(model) , model, session, prompt)
         st.rerun()
     else:

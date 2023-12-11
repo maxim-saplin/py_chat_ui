@@ -13,8 +13,8 @@ def right_align_2nd_col():
             z-index: 999;
             top: 40px;
             right: 50px;
-            color: rgb(98, 0, 255);
-            text-shadow: 0.5px 1px 0px black;
+            color: yellow;
+            text-shadow: 1.5px 1px 0px black;
             font-weight: 900;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
