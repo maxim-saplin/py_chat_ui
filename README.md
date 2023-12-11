@@ -1,10 +1,8 @@
 # Py Chat
 
-Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key etc. and get your own ChatGPT.
+Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key etc. and get your own ChatGPT. [Live demo](https://pychatui.streamlit.app)
 
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/b097f9bd-795b-44cc-acfd-931b1e889699)
-
-[Live demo](https://pychatui.streamlit.app)
 
 ## Features
 
