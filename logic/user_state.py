@@ -63,6 +63,8 @@ class ModelRepository:
 
     def delete(self, model_name: str) -> None:
         self.models = [model for model in self.models if model.name != model_name]
+        if self.last_used_model == model_name:
+            self.last_used_model = ""
         self.save()
 
     def update(self, model: Model) -> None:

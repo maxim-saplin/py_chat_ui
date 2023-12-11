@@ -16,9 +16,28 @@ def right_align_2nd_col():
             color: red;
             text-shadow: 1px 1px 0px green;
             font-weight: 900;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding-left: 20px;
+            padding-right: 15px;
+            padding-top: 5px;
+            padding-bottom: 5px;
+            mask-image: radial-gradient(circle, rgba(0,0,0,1) 85%, transparent 100%);
         } 
     </style>
     """,unsafe_allow_html=True)
+
+def hide_streamlit_toolbar():
+    """
+    Running man at the top right corner when a request is executed
+    """
+    st.markdown("""
+    <style>
+        div[data-testid="stToolbar"] {
+            display: none;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 def hide_streamlit_menu():

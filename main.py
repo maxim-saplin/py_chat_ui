@@ -3,11 +3,15 @@ from logic.user_state import init
 from ui.login import authenticate, show_logout, get_user_name, get_enc_key
 from ui.home import show_home
 from logic.crypto import *
+from ui.ui_helpers import hide_streamlit_menu, hide_streamlit_toolbar
 
 st.set_page_config(
     page_title="Py Chat",
     page_icon="ツ"
 )
+
+hide_streamlit_menu()
+hide_streamlit_toolbar()
 
 if auth:=authenticate():
     user = get_user_name()

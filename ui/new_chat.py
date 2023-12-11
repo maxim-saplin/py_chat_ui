@@ -1,7 +1,7 @@
 import streamlit as st
-from ui.ui_helpers import *
+from logic.user_state import ModelRepository, ChatSessionManager
 
-def start_new_chat(model_repository, session_manager, selected_model_name, system_message, prompt, temperature):
+def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager, selected_model_name: str, system_message: str, prompt: str, temperature: float) -> dict:
     st.title('New Chat')
     model_options = [model.name for model in model_repository.models]
     selected_model_index = model_options.index(selected_model_name) if selected_model_name in model_options else 0
