@@ -60,7 +60,12 @@ def show_home(show_logout: callable) -> None:
         session_names = [f'{session.title} ({session.session_id})' for session in sessions]
         menu_options =  session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value] if get_model() else session_names + [NavMenuOptions.SETTINGS.value]
         #previous_menu = st.session_state['selected_menu']
-        st.session_state['selected_menu'] = option_menu(None, menu_options, 
+        st.session_state['selected_menu'] = option_menu(
+            None, 
+            menu_options, 
+            styles={
+                "nav": {"font-family": "monospace;"},
+            },
             icons=[''] * len(session_names) + ['gear'] + ['plus'], menu_icon='cast', default_index= 0 if session_names else 1)
         if st.session_state['selected_menu'] in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
             st.session_state['chat_session_id'] = None
