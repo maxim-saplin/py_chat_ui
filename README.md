@@ -1,4 +1,4 @@
-# Chat with AI - Streamlit Application
+# Py Chat
 
 Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key etc. and get your own ChatGPT.
 
