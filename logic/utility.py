@@ -9,7 +9,7 @@ def create_client(model: Model) -> OpenAI:
         return AzureOpenAI(api_key=model.api_key, 
                            azure_endpoint=model.api_base, 
                            api_version=model.api_version,
-                           azure_deployment=model.name)
+                           azure_deployment=model.model_or_deployment_name)
     else:
         return OpenAI(api_key=model.api_key)
 

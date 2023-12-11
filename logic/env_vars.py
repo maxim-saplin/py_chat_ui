@@ -19,7 +19,8 @@ else:
     env_api_type: str = ApiTypeOptions[env_api_type].value
 env_api_version: str | None = os.environ.get("API_VERSION")
 env_api_base: str | None = os.environ.get("OPENAI_API_BASE")
+env_model_alias: str | None = os.environ.get("ALIAS")
 env_model_name: str | None = os.environ.get("MODEL")
 env_temperature: float = float(os.environ.get("TEMPERATURE", "0.0"))
 env_data_folder: str = os.getenv("DATA_DIR", ".data")
-env_disable_auth: bool = os.environ.get("DISABLE_AUTH", "False").lower() == "true"
+env_disable_auth: bool = os.environ.get("DISABLE_AUTH", "True").lower() == "true"

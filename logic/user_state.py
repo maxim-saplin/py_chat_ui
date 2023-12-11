@@ -12,8 +12,9 @@ user_dir: str = None
 encryption_key: bytes = None
 
 class Model:
-    def __init__(self, name: str, api_key: str, api_type: str, api_version: str, api_base: str, temperature: float, is_env: bool = False):
-        self.name: str = name
+    def __init__(self, alias: str, deployment_name: str, api_key: str, api_type: str, api_version: str, api_base: str, temperature: float, is_env: bool = False):
+        self.alias: str = alias
+        self.model_or_deployment_name: str = deployment_name
         self.api_key: str = api_key
         self.api_type: str = api_type
         self.api_version: str = api_version
@@ -25,61 +26,64 @@ class ModelRepository:
     def __init__(self):
         self.models: list[Model] = []
         self.last_used_model: str = ""
+        self.last_used_deployment: str = ""
 
     def load(self) -> None:
         try:
             with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'rb') as f:
                 encrypted_data = f.read()
-                self.models, self.last_used_model = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                self.models, self.last_used_model, self.last_used_deployment = pickle.loads(decrypt_data(encrypted_data, encryption_key))
         except FileNotFoundError:
             pass
         except InvalidToken:
             raise Exception("Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
 
-    def add_env(self, env_model: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float) -> None:
-        model = Model(env_model, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature, True)
+    def add_env(self, env_model_alias: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float, env_deployment_name: str) -> None:
+        model = Model(env_model_alias, env_deployment_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature,True)
         self.models.append(model)
 
     def add(self, model: Model) -> None:
         self.models.append(model)
         self.save()
 
-    def get_model_by_name(self, model_name: str) -> Model | None:
+    def get_model_by_alias(self, model_alias: str) -> Model | None:
         for model in self.models:
-            if model.name == model_name:
+            if model.alias == model_alias:
                 return model
         return None
     
     def get_last_used_model(self) -> Model | None:
-        if self.last_used_model and self.get_model_by_name(self.last_used_model):
-            return self.get_model_by_name(self.last_used_model)
+        if self.last_used_model and self.get_model_by_alias(self.last_used_model):
+            return self.get_model_by_alias(self.last_used_model)
         elif self.models:
             return self.models[0]
         return None
     
-    def set_last_used_model(self, model_name: str) -> None:
-        self.last_used_model = model_name
+    def set_last_used_model(self, model_alias: str) -> None:
+        self.last_used_model = model_alias
         self.save()
 
-    def delete(self, model_name: str) -> None:
-        self.models = [model for model in self.models if model.name != model_name]
-        if self.last_used_model == model_name:
+    def delete(self, model_alias: str) -> None:
+        self.models = [model for model in self.models if model.alias != model_alias]
+        if self.last_used_model == model_alias:
             self.last_used_model = ""
+            self.last_used_deployment = ""
         self.save()
 
     def update(self, model: Model) -> None:
         for i, m in enumerate(self.models):
-            if m.name == model.name:
+            if m.alias == model.alias:
                 self.models[i] = model
                 break
         self.save()
 
     def list(self) -> list[str]:
-        return [model.name for model in self.models]
+        return [model.alias for model in self.models]
 
     def save(self) -> None:
+        os.makedirs(os.path.join(env_data_folder, user_dir), exist_ok=True)
         with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
-            encrypted_data = encrypt_data(pickle.dumps((self.models, self.last_used_model)), encryption_key)
+            encrypted_data = encrypt_data(pickle.dumps((self.models, self.last_used_model, self.last_used_deployment)), encryption_key)
             f.write(encrypted_data)
 
 class ChatSession:
@@ -113,7 +117,7 @@ class ChatSession:
         with open(self.file_path, 'wb') as f:
             data = {
                 'session_id': self.session_id,
-                'model_name': self.model.name,
+                'model_alias': self.model.alias,
                 'title': self.title,
                 'start_date': self.start_date
             }
@@ -126,8 +130,8 @@ class ChatSession:
             with open(file_path, 'rb') as f:
                 encrypted_data = f.read()
                 data = pickle.loads(decrypt_data(encrypted_data, encryption_key))
-                model_name = data['model_name']
-                model = model_repository.get_model_by_name(model_name)
+                model_alias = data['model_alias']
+                model = model_repository.get_model_by_alias(model_alias)
                 if model is None:
                     model = model_repository.last_used_model
                 chat_session = cls(data['session_id'], model, data['title'])
@@ -211,7 +215,7 @@ def init(user_direrctory: str, enc_key) -> None:
     user_dir = user_direrctory
     encryption_key = enc_key
     model_repository = ModelRepository()
-    if env_model_name:
-        model_repository.add_env(env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
+    if env_model_alias:
+        model_repository.add_env(env_model_alias, env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
     model_repository.load()
     session_manager = ChatSessionManager()

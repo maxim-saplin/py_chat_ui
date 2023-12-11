@@ -10,7 +10,7 @@ def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSes
     if prompt != None:
         session.add_message({'role': 'user', 'content': prompt})
     for response in client.chat.completions.create(
-                model=model.name,
+                model=model.model_or_deployment_name,
                 temperature=model.temperature,
                 messages=[
                     {'role': m['role'], 'content': m['content']}
@@ -48,16 +48,16 @@ def show_chat(session: state.ChatSession, model: state.Model):
             st.rerun()
     with col2:
         if session is not None:
-            model_name = model.name if model else "No Model"
+            model_alias = model.alias if model else "No Model"
             tokens = util.num_tokens_from_messages(session.messages)
             if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
                 prompt_tokens = util.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
             else:
                 prompt_tokens = 0
             if prompt_tokens > 0:
-                st.write(f"{model_name} / {tokens} +{prompt_tokens}")
+                st.write(f"{model_alias} / {tokens} +{prompt_tokens}")
             else:
-                st.write(f"{model_name} / {tokens}")
+                st.write(f"{model_alias} / {tokens}")
 
     if session != None:
         for message in session.messages:

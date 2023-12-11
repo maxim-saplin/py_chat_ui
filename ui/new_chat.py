@@ -1,16 +1,16 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
 
-def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager, selected_model_name: str, system_message: str, prompt: str, temperature: float) -> dict:
+def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager, selected_model_alias: str, system_message: str, temperature: float) -> dict:
     st.title('New Chat')
-    model_options = [model.name for model in model_repository.models]
-    selected_model_index = model_options.index(selected_model_name) if selected_model_name in model_options else 0
-    selected_model_name = st.selectbox('Model', model_options, index=selected_model_index)
-    model = model_repository.get_model_by_name(selected_model_name)
+    model_options = [model.alias for model in model_repository.models]
+    selected_model_index = model_options.index(selected_model_alias) if selected_model_alias in model_options else 0
+    selected_model_alias = st.selectbox('Model', model_options, index=selected_model_index)
+    model = model_repository.get_model_by_alias(selected_model_alias)
     session = None            
     system_message = st.text_area('System message', st.session_state['system_message'])
     temperature = st.slider('Temperature', 0.0, 1.0, temperature, 0.01)
-    prompt = st.text_area('Prompt', st.session_state['prompt'])
+    prompt = st.text_area('Prompt')
     if st.button("Send message", type="primary"):
         if prompt:
             session = session_manager.create_session(model, ' '.join(prompt.split()[:5]))
@@ -21,11 +21,11 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             
             model.temperature = temperature
             model_repository.update(model)
-            model_repository.set_last_used_model(model.name)
+            model_repository.set_last_used_model(model.alias)
     
     # Return the updated state
     state_update = {
-        'selected_model_name': model.name,
+        'selected_model_alias': model.alias,
         'system_message': system_message,
         'temperature': temperature
     }

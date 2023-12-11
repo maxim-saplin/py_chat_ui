@@ -5,6 +5,12 @@ from ui.home import show_home
 from logic.crypto import *
 from ui.ui_helpers import add_theme_customizations, hide_streamlit_menu, hide_streamlit_toolbar
 
+# print('Py Chat, Request received')
+
+import time
+start_time = time.time()
+
+
 st.set_page_config(
     page_title="Py Chat",
     page_icon="ツ"
@@ -24,3 +30,5 @@ if auth:=authenticate():
             st.error(f'Error in main: {e}')
             show_logout(auth)
             raise e
+
+print(f'Py Chat, Request done in {(time.time() - start_time) * 1000:.2f} ms')

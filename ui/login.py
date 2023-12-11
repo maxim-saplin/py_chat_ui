@@ -74,6 +74,8 @@ def get_enc_key() -> bytes | None:
     Returns:
         Optional[bytes]: The extra payload if present, otherwise None.
     """
+    if env_disable_auth:
+        return generate_fernet_key('default', 'default')
     return st.session_state.get("auth_extra_payload", None)
 
 
