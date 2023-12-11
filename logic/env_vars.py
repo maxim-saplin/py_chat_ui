@@ -24,7 +24,7 @@ match os.environ.get("API_TYPE", "Fake").upper():
         None
 env_api_version: str | None = os.environ.get("API_VERSION")
 env_api_base: str | None = os.environ.get("OPENAI_API_BASE")
-env_model_alias: str | None = os.environ.get("ALIAS")
+env_model_alias: str | None = os.environ.get("ALIAS", "Fake auto-reply model (demonstration)" if env_api_type == ApiTypeOptions.FAKE else None)
 env_model_name: str | None = os.environ.get("MODEL")
 env_temperature: float = float(os.environ.get("TEMPERATURE", "0.0"))
 env_data_folder: str = os.getenv("DATA_DIR", ".data")
