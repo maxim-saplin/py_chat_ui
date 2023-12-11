@@ -38,7 +38,7 @@ class ModelRepository:
         except InvalidToken:
             raise Exception("Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
 
-    def add_env(self, env_model_alias: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float, env_deployment_name: str) -> None:
+    def add_env(self, env_model_alias: str, env_deployment_name: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float) -> None:
         model = Model(env_model_alias, env_deployment_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature,True)
         self.models.append(model)
 
