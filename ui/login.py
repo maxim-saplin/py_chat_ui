@@ -9,8 +9,9 @@ from logic.crypto import generate_fernet_key
 users_file: str = os.path.join(env_data_folder, 'users.yaml')
 
 # Load the configuration file with the user credentials
-with open(users_file) as file:
-    config = yaml.load(file, Loader=SafeLoader)
+if not env_disable_auth:
+    with open(users_file) as file:
+        config = yaml.load(file, Loader=SafeLoader)
 
 def get_auth(config):
     authenticator = stauth.Authenticate(
