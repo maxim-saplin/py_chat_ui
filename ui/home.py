@@ -2,8 +2,8 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from enum import Enum
 import logic.user_state as state
-import logic.utility as util
 from ui.chat_session import show_chat
+from ui.new_chat import start_new_chat
 from ui.ui_helpers import *
 
 def show_home(show_logout: callable) -> None:
@@ -139,62 +139,23 @@ def show_home(show_logout: callable) -> None:
                     st.session_state['selected_model_name'] = last_model.name if last_model else None
                     st.rerun()
                 
-    #### Starting a chat
-    elif st.session_state['selected_menu'] == NavMenuOptions.NEW.value:
-        st.title('New Chat')
-        model_options = [model.name for model in state.model_repository.models]
-        selected_model_index = model_options.index(st.session_state['selected_model_name']) if st.session_state['selected_model_name'] in model_options else 0
-        st.session_state['selected_model_name'] = st.selectbox('Model', model_options, index=selected_model_index)
-        st.session_state['system_message'] = st.text_area('System message', st.session_state['system_message'])
-        temperature = st.slider('Temperature', 0.0, 1.0, get_model().temperature, 0.01)
-        prompt = st.text_area('Prompt', st.session_state['prompt'])
-        st.button("Send message", type="primary")
-        if prompt:
-            title = prompt.split()[:5]
-            model = get_model()
-            session = state.session_manager.create_session(model, ' '.join(title))
-            if st.session_state['system_message']:
-                session.add_message({'role': 'system', 'content': st.session_state['system_message']})
-            session.add_message({'role': 'user', 'content': prompt}) 
-            st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
-            st.session_state['chat_session_id'] = session.session_id
-            model.temperature = temperature
-            state.model_repository.update(model)
-            state.model_repository.set_last_used_model(model.name)
-            st.rerun()
+    #### New Chat
+    elif st.session_state['selected_menu'] == NavMenuOptions.NEW.value: 
+        state_updates = start_new_chat(
+            state.model_repository,
+            state.session_manager,
+            st.session_state['selected_model_name'],
+            st.session_state['system_message'],
+            st.session_state['prompt'],
+            get_model().temperature,
+        )
 
-        # def start_new_chat(model_name, system_message, prompt, temperature):
-        #     st.title('New Chat')
-        #     model_options = [model.name for model in state.model_repository.models]
-        #     selected_model_index = model_options.index(model_name) if model_name in model_options else 0
-        #     model_name = st.selectbox('Model', model_options, index=selected_model_index)
-        #     system_message = st.text_area('System message', system_message)
-        #     temperature = st.slider('Temperature', 0.0, 1.0, get_model().temperature, 0.01)
-        #     prompt = st.text_area('Prompt', prompt)
-        #     st.button("Send message", type="primary")
-        #     if prompt:
-        #         title = prompt.split()[:5]
-        #         model = get_model()
-        #         session = state.session_manager.create_session(model, ' '.join(title))
-        #         if system_message:
-        #             session.add_message({'role': 'system', 'content': system_message})
-        #         session.add_message({'role': 'user', 'content': prompt}) 
-        #         st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
-        #         st.session_state['chat_session_id'] = session.session_id
-        #         model.temperature = temperature
-        #         state.model_repository.update(model)
-        #         state.model_repository.set_last_used_model(model.name)
-        #         st.rerun()
-
-        # # Call the function with current state values
-        # start_new_chat(
-        #     st.session_state['selected_model_name'],
-        #     st.session_state['system_message'],
-        #     st.session_state['prompt'],
-        #     get_model().temperature
-        # )
+        for key, value in state_updates.items():
+            st.session_state[key] = value
+        
+        if st.session_state['prompt']:
+           st.rerun()
             
-            
-    #### Chat
+    #### Chat session/Dialog
     else:
         show_chat(session, get_model())
