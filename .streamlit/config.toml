@@ -14,4 +14,20 @@ gatherUsageStats = false
 #                 Streamlit Community Cloud) or through st.set_page_config.
 #                 If there are no options left, hide the menu.
 # Default: "auto"
-toolbarMode = "minimal"
+toolbarMode = "auto"
+
+#[theme]
+#base="light"
+#primaryColor="#000000"
+#backgroundColor="#dedede"
+#secondaryBackgroundColor="#fdfdfd"
+#textColor="#000000"
+#font="monospace"
+
+[theme]
+base="dark"
+primaryColor="#000000"
+backgroundColor="#232323"
+secondaryBackgroundColor="#424242"
+textColor="#FFFFFF"
+font="monospace"

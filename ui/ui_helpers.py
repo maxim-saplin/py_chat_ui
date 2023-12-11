@@ -13,8 +13,8 @@ def right_align_2nd_col():
             z-index: 999;
             top: 40px;
             right: 50px;
-            color: red;
-            text-shadow: 1px 1px 0px green;
+            color: rgb(98, 0, 255);
+            text-shadow: 0.5px 1px 0px black;
             font-weight: 900;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -39,8 +39,24 @@ def hide_streamlit_toolbar():
     </style>
     """, unsafe_allow_html=True)
 
+def add_theme_customizations():
+    """
+    Adjusting those styles that were not possible to be changed in config.toml
+    """
+    st.markdown("""
+
+    <style>
+        div.stChatMessage p{
+            font-family: sans-serif;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 
 def hide_streamlit_menu():
+    """
+    Deply, Three Dots button, as well as Made with Streamlit at the bottom
+    """
     st.markdown("""
     <style>
         .reportview-container {
