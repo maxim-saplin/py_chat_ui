@@ -1,4 +1,8 @@
-# Chat with AI - Streamlit Application
+# Py Chat
+
+Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key etc. and get your own ChatGPT.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/b097f9bd-795b-44cc-acfd-931b1e889699)
 
 ## Features
 
@@ -72,3 +76,15 @@ Start Docker Desktop and run command in terminal, after teh cintainer is started
 docker build -t py-chat-ui .
 docker run -p 8501:8501 py-chat-ui
 ```
+
+## Screenshots
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/4f318108-3fa6-4e3d-b416-d1bf1535c58c)
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/cca8095f-1bad-443e-a911-3c650d035b9c)
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/37f988e4-ea53-4642-b457-4c3ba619fb92)
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/8d242ffd-88b1-4d63-88d8-6e5a214cfbe9)
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/5e00aa12-a8ee-45e1-8493-e5a113a06e8c)
