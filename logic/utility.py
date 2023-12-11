@@ -5,11 +5,13 @@ from logic.env_vars import ApiTypeOptions
 from logic.user_state import Model
 
 def create_client(model: Model) -> OpenAI:
-    if model.api_type == ApiTypeOptions.AZURE.value:
+    if model.api_type == ApiTypeOptions.AZURE:
         return AzureOpenAI(api_key=model.api_key, 
                            azure_endpoint=model.api_base, 
                            api_version=model.api_version,
                            azure_deployment=model.model_or_deployment_name)
+    elif model.api_type == ApiTypeOptions.FAKE:
+        return FakeOpenAI()
     else:
         return OpenAI(api_key=model.api_key)
 
@@ -32,3 +34,23 @@ def num_tokens_from_messages(messages: list[dict]) -> int:
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|im_start|>assistant<|im_sep|>
     return num_tokens
+
+class FakeOpenAI:
+    def __init__(self):
+        self.chat = self.Chat()
+
+    class Chat:
+        def __init__(self):
+            self.completions = self.Completions()
+
+        class Completions:
+            def create(self, *args, **kwargs):
+                yield self.ChatCompletionChunk()
+
+            class ChatCompletionChunk:
+                def __init__(self):
+                    self.choices = [self.Choice()]
+
+                class Choice:
+                    def __init__(self):
+                        self.content = 'Hello world!'

@@ -21,6 +21,7 @@ def show_home(show_logout: callable) -> None:
         'prompt': '',
         'chat_session_id': None,
         'selected_model_alias': None,
+        'selected_model_alias_in_settings': None,
         'selected_menu': None,
     }
     for key, default_value in session_state_defaults.items():
@@ -80,7 +81,7 @@ def show_home(show_logout: callable) -> None:
     #### Settings
     if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
         state_updates = manage_models(
-            st.session_state['selected_model_alias'],
+            st.session_state['selected_model_alias_in_settings'],
             state.model_repository
         )
     

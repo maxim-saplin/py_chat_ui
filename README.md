@@ -2,16 +2,19 @@
 
 ## Features
 
-- **Token counter**: get number of tokens in the dialog and in the prompt being typed 
-- **Azure and OpenAI supported**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
-- **Model Customization**: Users can add, update, and delete AI models with custom settings.
-- **Single and Multi user**: Anonymous auth (single user) OR user authentication against a local YAML user DB (pairs of usernames/password hashes).
+- **Minimal, responsivee UI**
+- **Token counter**: get number of tokens in the dialog and in the prompt being typed
+  - Can be seen at the top right corner, counts dialog length + the number of tokens in the promnpt being typed
+- **Azure and OpenAI**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
+- **Response srtreaming**: see how OpneAI is typing back
+- **Model Customization**: Users can add, update, and delete AI models with custom settings in UI OR have a mode defined in ENV variables
+- **Single and Multi user**: Anonymous authentication (single user) with not lock screen OR user authentication against a local user DBin a YAML file (pairs of usernames/password hashes).
 - **Chat Persistence**: Dialogs are saved on the server in flies and can be access acros different devices.
-- **Data encryption**: All user data (chat dialogs and model settings) is encrypted using hashed keys (stored in users server-only cookies)
+- **Data encryption**: All user data (chat dialogs and model settings) is encrypted using hashed keys (stored in user's server-only/http-only cookies)
   - Loosing user creds means loosing stored user data. No pasword change is supported!
   - Protection against leaking sotred files. If the attacker can debug the server OR can steal cookies the encryption keys can be exposed
 - **Environment Configuration**: Easy setup with environment variables or `.env` file.
-- **Local and Debug Running**: Run the application locally or debug with VSCode.
+- **Run and Debug localy**: Run the application locally or via Docker, or debug with VSCode
 
 ## Evironment variables
 
@@ -20,7 +23,7 @@ You can configure the app either via setting environment variables or puttin val
 | Environment Variable | Description | Default Value |
 |----------------------|-------------|---------------|
 | `OPENAI_API_KEY`     | The API key for OpenAI or Azure | None |
-| `API_TYPE`           | The type of API to use (OpenAI or Azure) | None |
+| `API_TYPE`           | The type of API to use (OpenAI, Azure, Fake) | None |
 | `API_VERSION`        | The version of the API | None |
 | `OPENAI_API_BASE`    | The base URL for the OpenAI API | None |
 | `ALIAS`              | The alias for the model | None |
@@ -30,13 +33,14 @@ You can configure the app either via setting environment variables or puttin val
 | `DISABLE_AUTH`       | Whether to disable user authentication | "False" |
 
 **Remarks, notes:**
+- If `API_TYPE` is set to `Fake` all message will get a static reply, no call to API will be made. For demonstration purposes
 - Providing  Azure/OpenAI model credentials (API key, deployment URL, etc.) via environment variables is not the only option. Users can also add their credentials in the Web UI, those creds will be encrypted and stored in `models.dat` file
 - `DATA_DIR` - that's where all conversations and model settings will be saved. Each user will have a `$username` subfolder.
 - `DISABLE_AUTH` - if set to [True], no login page will be shown, and all data will be stored under `$DATA_DIR/default_user`.
 
-## Set-up user creds
+## Local User DB
 
-`users.yaml` storder under `$DATA_DIR` stores usernames and hashes that are used to authenticate and allow user in. Make changes to this file in prod to make adjustment to who and how can access the app.
+`users.yaml` stored under `$DATA_DIR` keeps usernames and hashes that are used to authenticate and allow users in. Make changes to this file in the prod to make adjustments to who and how can access the app.
 
 1. Generate Credentials:
 - Run generate_pass.py.

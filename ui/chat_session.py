@@ -20,8 +20,10 @@ def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSes
             ):
         if response.choices:
             first_choice = response.choices[0]
-            if first_choice.delta and first_choice.delta.content:
+            if hasattr(first_choice, 'delta') and first_choice.delta and first_choice.delta.content:
                 full_response += first_choice.delta.content
+            elif hasattr(first_choice, 'content') and first_choice.content:
+                full_response = first_choice.content
         message_placeholder.markdown(full_response + '▌')
     message_placeholder.markdown(full_response)
     session.add_message({'role': 'assistant', 'content': full_response})
@@ -66,15 +68,15 @@ def show_chat(session: state.ChatSession, model: state.Model):
                 st.markdown(message['content'])
 
     if session.messages and session.messages[-1]['role'] == 'user':
-        with st.chat_message('assistant', avatar=st.image('ui/ai.png')):
+        with st.chat_message('assistant', avatar='ui/ai.png'):
             get_ai_reply(util.create_client(model) , model, session, None)
         st.rerun()
     if prompt := st.chat_input('What is up?'):
         st.session_state['prompt_for_tokenizer'] = None
-        with st.chat_message('user', avatar=st.image('ui/user.png')):
+        with st.chat_message('user', avatar='ui/user.png'):
             st.markdown(prompt)
 
-        with st.chat_message('assistant', avatar=st.image('ui/ai.png')):
+        with st.chat_message('assistant', avatar='ui/ai.png'):
             get_ai_reply(util.create_client(model) , model, session, prompt)
         st.rerun()
     else:

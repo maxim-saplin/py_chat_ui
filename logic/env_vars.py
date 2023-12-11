@@ -10,13 +10,18 @@ CHATS_FOLDER: str = "chats"
 class ApiTypeOptions(Enum):
     AZURE = 'Azure'
     OPENAI = 'OpenAI'
+    FAKE = 'Fake'
 
 env_api_key: str | None = os.environ.get("OPENAI_API_KEY")
-env_api_type: str | None = os.environ.get("API_TYPE")
-if env_api_type not in ApiTypeOptions.__members__:
-    env_api_type: str = ApiTypeOptions.AZURE.value
-else:
-    env_api_type: str = ApiTypeOptions[env_api_type].value
+match os.environ.get("API_TYPE", "Fake").upper():
+    case "AZURE":
+        env_api_type: ApiTypeOptions = ApiTypeOptions.AZURE
+    case "OPENAI":
+        env_api_type: ApiTypeOptions = ApiTypeOptions.OPENAI
+    case "FAKE":
+        env_api_type: ApiTypeOptions = ApiTypeOptions.FAKE
+    case _:
+        None
 env_api_version: str | None = os.environ.get("API_VERSION")
 env_api_base: str | None = os.environ.get("OPENAI_API_BASE")
 env_model_alias: str | None = os.environ.get("ALIAS")

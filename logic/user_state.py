@@ -12,11 +12,11 @@ user_dir: str = None
 encryption_key: bytes = None
 
 class Model:
-    def __init__(self, alias: str, deployment_name: str, api_key: str, api_type: str, api_version: str, api_base: str, temperature: float, is_env: bool = False):
+    def __init__(self, alias: str, deployment_name: str, api_key: str, api_type: ApiTypeOptions, api_version: str, api_base: str, temperature: float, is_env: bool = False):
         self.alias: str = alias
         self.model_or_deployment_name: str = deployment_name
         self.api_key: str = api_key
-        self.api_type: str = api_type
+        self.api_type: ApiTypeOptions = api_type
         self.api_version: str = api_version
         self.api_base: str = api_base
         self.temperature: float = temperature
@@ -39,8 +39,10 @@ class ModelRepository:
             raise Exception("Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
 
     def add_env(self, env_model_alias: str, env_deployment_name: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float) -> None:
-        model = Model(env_model_alias, env_deployment_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature,True)
-        self.models.append(model)
+        if not any(model.alias == env_model_alias for model in self.models):
+            model = Model(env_model_alias, env_deployment_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature, True)
+            self.models.append(model)
+            self.save()
 
     def add(self, model: Model) -> None:
         self.models.append(model)
@@ -215,7 +217,7 @@ def init(user_direrctory: str, enc_key) -> None:
     user_dir = user_direrctory
     encryption_key = enc_key
     model_repository = ModelRepository()
+    model_repository.load()
     if env_model_alias:
         model_repository.add_env(env_model_alias, env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
-    model_repository.load()
     session_manager = ChatSessionManager()

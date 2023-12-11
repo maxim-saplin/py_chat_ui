@@ -13,7 +13,7 @@ start_time = time.time()
 
 st.set_page_config(
     page_title='Py Chat',
-    page_icon=':shark:'
+    page_icon='ツ'
 )
 
 hide_streamlit_menu()
