@@ -77,6 +77,7 @@ def show_home(show_logout: callable) -> None:
             session_id = int(session_id_str.rstrip(')'))
             st.session_state['chat_session_id'] = session_id
             session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
+        st.markdown("[[?]](https://github.com/maxim-saplin/py_chat_ui/tree/main)")
 
     #### Settings
     if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
