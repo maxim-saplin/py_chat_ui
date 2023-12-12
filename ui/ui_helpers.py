@@ -22,6 +22,18 @@ def register_button_as_link():
     </style>
     """, unsafe_allow_html=True)
 
+def sidebar_link():
+    st.markdown("""
+    <style>
+        div[data-testid="stSidebarUserContent"] div.element-container:last-child  {
+            position: fixed;
+            bottom: 10px;
+            opacity: 0.5;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
+
 def login_background():
     st.markdown("""
     <style>
