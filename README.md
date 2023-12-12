@@ -10,7 +10,8 @@ Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key et
 - **Token counter**: get number of tokens in the dialog and in the prompt being typed
   - Can be seen at the top right corner, counts dialog length + the number of tokens in the promnpt being typed
 - **Azure and OpenAI**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
-- **Can be deployed as a single container:** no dependencies on Progress, all data is stored in local files and encrypted
+- **Can be deployed as a single container:** no dependencies on Postgress, all data is stored in local files and encrypted
+-   `docker pull ghcr.io/maxim-saplin/py_chat_ui:latest`
 - **Response srtreaming**: see how OpneAI is typing back
 - **Model Customization**: Users can add, update, and delete AI models with custom settings in UI OR have a mode defined in ENV variables
 - **Single and Multi user**: Anonymous authentication (single user) with not lock screen OR user authentication against a local user DBin a YAML file (pairs of usernames/password hashes).
