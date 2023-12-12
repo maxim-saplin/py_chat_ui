@@ -1,3 +1,5 @@
+__version__ = '0.1.1'
+
 import streamlit as st
 from logic.user_state import init
 from ui.login import authenticate, show_logout, get_user_name, get_enc_key

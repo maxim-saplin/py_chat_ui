@@ -12,15 +12,103 @@ user_dir: str = None
 encryption_key: bytes = None
 
 class Model:
-    def __init__(self, alias: str, deployment_name: str, api_key: str, api_type: ApiTypeOptions, api_version: str, api_base: str, temperature: float, is_env: bool = False):
-        self.alias: str = alias
-        self.model_or_deployment_name: str = deployment_name
-        self.api_key: str = api_key
-        self.api_type: ApiTypeOptions = api_type
-        self.api_version: str = api_version
-        self.api_base: str = api_base
-        self.temperature: float = temperature
-        self.is_env: bool = is_env
+    def __init__(self, 
+                 alias: str, 
+                 deployment_name: str, 
+                 api_key: str, 
+                 api_type: ApiTypeOptions, 
+                 api_version: str, 
+                 api_base: str, 
+                 temperature: float, 
+                 is_env: bool = False):       
+        self.alias = alias
+        self.model_or_deployment_name = deployment_name
+        self.api_key = api_key
+        self.api_type = api_type
+        self.api_version = api_version
+        self.api_base = api_base
+        self.temperature = temperature
+        self.is_env = is_env
+
+    @property
+    def alias(self):
+        return self._alias
+
+    @alias.setter
+    def alias(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected alias to be a string")
+        self._alias = value
+
+    @property
+    def model_or_deployment_name(self):
+        return self._model_or_deployment_name
+
+    @model_or_deployment_name.setter
+    def model_or_deployment_name(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected model_or_deployment_name to be a string")
+        self._model_or_deployment_name = value
+
+    @property
+    def api_key(self):
+        return self._api_key
+
+    @api_key.setter
+    def api_key(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected api_key to be a string")
+        self._api_key = value
+
+    @property
+    def api_type(self):
+        return self._api_type
+
+    @api_type.setter
+    def api_type(self, value):
+        if not isinstance(value, ApiTypeOptions):
+            raise TypeError("Expected api_type to be an instance of ApiTypeOptions")
+        self._api_type = value
+
+    @property
+    def api_version(self):
+        return self._api_version
+
+    @api_version.setter
+    def api_version(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected api_version to be a string")
+        self._api_version = value
+
+    @property
+    def api_base(self):
+        return self._api_base
+
+    @api_base.setter
+    def api_base(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected api_base to be a string")
+        self._api_base = value
+
+    @property
+    def temperature(self):
+        return self._temperature
+
+    @temperature.setter
+    def temperature(self, value):
+        if not isinstance(value, float):
+            raise TypeError("Expected temperature to be a float")
+        self._temperature = value
+
+    @property
+    def is_env(self):
+        return self._is_env
+
+    @is_env.setter
+    def is_env(self, value):
+        if not isinstance(value, bool):
+            raise TypeError("Expected is_env to be a boolean")
+        self._is_env = value
 
 class ModelRepository:
     def __init__(self):

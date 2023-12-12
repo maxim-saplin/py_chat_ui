@@ -12,7 +12,7 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
     st.title('Manage Models')
     model_options = [ADD_NEW_MODEL_TEXT] + [model.alias for model in model_repository.models]
     model_selected_index = model_options.index(selected_model_alias_in_settings) if selected_model_alias_in_settings in model_options else 0
-    selected_model_alias_in_settings = st.selectbox('Select Model', model_options, index=model_selected_index)
+    selected_model_alias_in_settings = st.selectbox('Select Model', model_options)
     selected_model = next((model for model in state.model_repository.models if model.alias == selected_model_alias_in_settings), None)
     is_env_model = selected_model.is_env if selected_model else False
 
@@ -20,9 +20,13 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
     is_fake_type = selected_model.api_type == state.ApiTypeOptions.FAKE if selected_model else False
     st.subheader('Fake Model Settings' if is_fake_type else ADD_NEW_MODEL_TEXT if is_new_model else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
 
-    api_type_options = [option.value for option in state.ApiTypeOptions if option != state.ApiTypeOptions.FAKE]
+    api_type_options = [state.ApiTypeOptions.AZURE, state.ApiTypeOptions.OPENAI]
     api_type_index = api_type_options.index(selected_model.api_type) if selected_model and selected_model.api_type in api_type_options else 0
-    api_type = st.selectbox('API Type', api_type_options, index=api_type_index, disabled=is_env_model or is_fake_type, on_change=lambda: st.rerun())
+    api_type = st.selectbox('API Type', 
+                    [option.value for option in api_type_options], 
+                    index=api_type_index, 
+                    disabled=is_env_model or is_fake_type)
+    api_type = state.ApiTypeOptions.from_string(api_type)
 
     selected_model_alias_in_settings = st.text_input('Model Alias (Display Name)', value=selected_model_alias_in_settings if not is_new_model else '', disabled=is_env_model or is_fake_type)
     is_openai_type = api_type == state.ApiTypeOptions.OPENAI
@@ -53,32 +57,43 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
             st.error(error)
 
     if is_new_model and not is_fake_type:
-        if st.button('Add Model') and not errors:
-            model = state.Model(selected_model_alias_in_settings, model_or_deployment_name, api_key, api_type, api_version, api_base, temperature)
-            state.model_repository.add(model)
-            st.success('Model added successfully!')
-            selected_model_alias_in_settings = model.alias 
-            models_changed = True
+        if st.button('Add Model'):
+            if not errors:
+                try:
+                    model = state.Model(selected_model_alias_in_settings, model_or_deployment_name, api_key, api_type, api_version, api_base, temperature)
+                    state.model_repository.add(model)
+                    st.success('Model added successfully!')
+                    selected_model_alias_in_settings = model.alias 
+                    models_changed = True
+                except Exception as e:
+                    st.error(f"Failed to add model: {e}")
     else:
         if not is_env_model and not is_fake_type:
-            if st.button('Update Model') and not errors:
-                selected_model.alias = selected_model_alias_in_settings
-                selected_model.model_or_deployment_name = model_or_deployment_name
-                selected_model.api_key = api_key
-                selected_model.api_type = api_type
-                selected_model.api_version = api_version
-                selected_model.api_base = api_base
-                selected_model.temperature = temperature
-                state.model_repository.update(selected_model)
-                selected_model_alias_in_settings = selected_model.alias 
-                st.success('Model updated successfully!')
-                models_changed = True
+            if st.button('Update Model'):
+                if not errors:
+                    try:
+                        selected_model.alias = selected_model_alias_in_settings
+                        selected_model.model_or_deployment_name = model_or_deployment_name
+                        selected_model.api_key = api_key
+                        selected_model.api_type = api_type
+                        selected_model.api_version = api_version
+                        selected_model.api_base = api_base
+                        selected_model.temperature = temperature
+                        state.model_repository.update(selected_model)
+                        selected_model_alias_in_settings = selected_model.alias 
+                        st.success('Model updated successfully!')
+                        models_changed = True
+                    except Exception as e:
+                        st.error(f"Failed to update model: {e}")
             if st.button('Delete Model'):
-                state.model_repository.delete(selected_model.alias)
-                st.success('Model deleted successfully!')
-                last_model = state.model_repository.get_last_used_model()
-                selected_model_alias_in_settings = last_model.alias if last_model else None
-                models_changed = True
+                try:
+                    state.model_repository.delete(selected_model.alias)
+                    st.success('Model deleted successfully!')
+                    last_model = state.model_repository.get_last_used_model()
+                    selected_model_alias_in_settings = last_model.alias if last_model else None
+                    models_changed = True
+                except Exception as e:
+                    st.error(f"Failed to delete model: {e}")
     return {
         'selected_model_alias_in_settings': selected_model_alias_in_settings,
         'models_changed': models_changed
