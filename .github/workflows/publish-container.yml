@@ -30,7 +30,7 @@ jobs:
 
       - name: Extract version from source code
         run: |
-          VERSION=$(python -c "import main; print(main.__version__)")
+          VERSION=$(awk 'NR==1 {print $3}' main.py | tr -d "'")
           echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Build and push Docker image with source code version tag
