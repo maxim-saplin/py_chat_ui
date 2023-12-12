@@ -35,7 +35,8 @@ jobs:
 
       - name: Build and push Docker image with source code version tag
         run: |
-          docker build -t ghcr.io/${{ github.repository }}/my-app:$VERSION .
-          docker push ghcr.io/${{ github.repository }}/my-app:$VERSION
+          docker build -t ghcr.io/${{ github.repository }}/app:$VERSION -t ghcr.io/${{ github.repository }}/app:latest .
+          docker push ghcr.io/${{ github.repository }}/app:$VERSION
+          docker push ghcr.io/${{ github.repository }}/app:latest
         env:
           VERSION: ${{ env.VERSION }}
