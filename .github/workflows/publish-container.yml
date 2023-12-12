@@ -34,10 +34,14 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Extract version from source code
+        run: |
+          VERSION=$(python -c "from logic.version import __version__; print(__version__)")
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
       - name: Build and push Docker image with source code version tag
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ghcr.io/${{ github.repository }}/my-app:${{ env.VERSION }}
+        run: |
+          docker build -t ghcr.io/${{ github.repository }}/my-app:$VERSION .
+          docker push ghcr.io/${{ github.repository }}/my-app:$VERSION
+        env:
+          VERSION: ${{ env.VERSION }}
