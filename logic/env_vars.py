@@ -11,6 +11,7 @@ class ApiTypeOptions(Enum):
     AZURE = 'Azure'
     OPENAI = 'OpenAI'
     FAKE = 'Fake'
+    EMPTY = 'Empty'
 
 env_api_key: str | None = os.environ.get("OPENAI_API_KEY")
 match os.environ.get("API_TYPE", "Fake").upper():
@@ -20,6 +21,8 @@ match os.environ.get("API_TYPE", "Fake").upper():
         env_api_type: ApiTypeOptions = ApiTypeOptions.OPENAI
     case "FAKE":
         env_api_type: ApiTypeOptions = ApiTypeOptions.FAKE
+    case "EMPTY":
+        env_api_type: ApiTypeOptions = ApiTypeOptions.EMPTY
     case _:
         None
 env_api_version: str | None = os.environ.get("API_VERSION")
@@ -29,3 +32,5 @@ env_model_name: str | None = os.environ.get("MODEL")
 env_temperature: float = float(os.environ.get("TEMPERATURE", "0.0"))
 env_data_folder: str = os.getenv("DATA_DIR", ".data")
 env_disable_auth: bool = os.environ.get("DISABLE_AUTH", "True").lower() == "true"
+env_disable_user_registration: bool = os.environ.get("DISBLE_USER_REG", "False").lower() == "true"
+

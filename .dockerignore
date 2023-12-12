@@ -154,3 +154,8 @@ cython_debug/
 .env
 .cptx/
 .data/
+.DS_Store
+.git
+.devcontainer
+.gitignore
+.gitattributes

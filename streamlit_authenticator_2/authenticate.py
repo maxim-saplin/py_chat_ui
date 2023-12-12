@@ -38,7 +38,10 @@ class Authenticate:
             A Validator object that checks the validity of the username, name, and email fields.
         """
         self.credentials = credentials
-        self.credentials['usernames'] = {key.lower(): value for key, value in credentials['usernames'].items()}
+        if credentials and 'usernames' in credentials and credentials['usernames']:
+            self.credentials['usernames'] = {key.lower(): value for key, value in credentials['usernames'].items()}
+        else:
+            self.credentials['usernames'] = {}
         self.cookie_name = cookie_name
         self.key = key
         self.cookie_expiry_days = cookie_expiry_days

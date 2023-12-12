@@ -3,15 +3,16 @@ import streamlit_authenticator_2 as stauth
 import os
 import yaml
 from yaml.loader import SafeLoader
-from logic.env_vars import env_data_folder, env_disable_auth
+from logic.env_vars import env_data_folder, env_disable_auth, env_disable_user_registration
 from logic.crypto import generate_fernet_key
-from ui.ui_helpers import register_button_as_link
+from ui.ui_helpers import login_background, register_button_as_link
 
 users_file: str = os.path.join(env_data_folder, 'users.yaml')
 
 # Load the configuration file with the user credentials
 if not env_disable_auth:
     if not os.path.exists(users_file):
+        os.makedirs(os.path.dirname(users_file), exist_ok=True)
         with open(users_file, 'w') as file:
             file.write("""
 credentials:
@@ -57,8 +58,6 @@ def authenticate() -> stauth.Authenticate | str | None:
 
     authenticator._check_cookie()
 
-    
-
     if st.session_state.get("authentication_status", None):
         return authenticator
     else:
@@ -66,13 +65,16 @@ def authenticate() -> stauth.Authenticate | str | None:
             st.session_state['view_mode'] = 'login'
 
         register_button_as_link()
+        login_background()
 
         if st.session_state['view_mode'] == 'login':
-            if st.button('Register a new user'):
+            if not env_disable_user_registration and st.button('Register a new user'):
                 st.session_state['view_mode'] = 'register'
                 st.rerun()
             # Call generate_fernet_key insternally, pass user name and passwrod and keep the key in server cookies
             authenticator.login('', 'main', generate_fernet_key)
+            if st.session_state["authentication_status"] is False:
+                st.error('Username/password is incorrect')
 
         elif st.session_state['view_mode'] == 'register':
             if st.button('⇠ Back to login'):
@@ -81,14 +83,11 @@ def authenticate() -> stauth.Authenticate | str | None:
             try:
                 if authenticator.register_user('Register a new user', preauthorization=False, skipEmail=True):
                     st.success('User registered successfully')
-                    st.session_state['view_mode'] = 'login'
+                    with open(users_file, 'w') as file:
+                        yaml.dump(config, file, default_flow_style=False)
+                    #st.session_state['view_mode'] = 'login'
             except Exception as e:
-                st.error(e)
-
-        else:
-            if st.session_state["authentication_status"] is False:
-                st.error('Username/password is incorrect')
-        
+                st.error(e)        
 
         # elif st.session_state["authentication_status"] is None:
         #     st.warning('Please enter your username and password')

@@ -1,6 +1,15 @@
 import streamlit as st
 from streamlit.components.v1 import html
 
+# def button_hover_color():
+#     st.markdown("""
+#     <style>
+#         button:hover {
+#             color: #FF0000;
+#         }
+#     </style>
+#     """, unsafe_allow_html=True)
+
 def register_button_as_link():
     st.markdown("""
     <style>
@@ -12,6 +21,27 @@ def register_button_as_link():
         }
     </style>
     """, unsafe_allow_html=True)
+
+def login_background():
+    st.markdown("""
+    <style>
+        div.stApp {
+            background: repeating-linear-gradient(
+                45deg,
+                rgba(128, 128, 128, 0.15),
+                rgba(128, 128, 128, 0.15) 80px,
+                transparent 80px,
+                transparent 160px
+            );
+        }
+
+        div.stApp div[data-testid="stForm"]{
+            background-color: #232323;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 
 def right_align_2nd_col():
     st.markdown(
