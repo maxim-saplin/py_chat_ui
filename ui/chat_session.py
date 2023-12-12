@@ -1,13 +1,14 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import *
+from ui.ui_helpers import embed_chat_input_handler_js, hide_tokinzer_workaround_form
+
 
 def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSession, prompt: str | None) -> str:
     message_placeholder = st.empty()
     full_response = ''
 
-    if prompt != None:
+    if prompt is not None:
         session.add_message({'role': 'user', 'content': prompt})
     for response in client.chat.completions.create(
                 model=model.model_or_deployment_name,
@@ -28,6 +29,7 @@ def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSes
     message_placeholder.markdown(full_response)
     session.add_message({'role': 'assistant', 'content': full_response})
     return full_response
+
 
 def show_chat(session: state.ChatSession, model: state.Model):
     if 'prompt_for_tokenizer' not in st.session_state:
@@ -53,7 +55,8 @@ def show_chat(session: state.ChatSession, model: state.Model):
             model_alias = model.alias if model else "No Model"
             tokens = util.num_tokens_from_messages(session.messages)
             if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
-                prompt_tokens = util.num_tokens_from_messages([{'role':'User','content': st.session_state['prompt_for_tokenizer']}])
+                prompt_tokens = util.num_tokens_from_messages(
+                    [{'role': 'User', 'content': st.session_state['prompt_for_tokenizer']}])
             else:
                 prompt_tokens = 0
             if prompt_tokens > 0:
@@ -62,15 +65,16 @@ def show_chat(session: state.ChatSession, model: state.Model):
                 st.write(f"{model_alias} / {tokens}")
 
     try:
-        if session != None:
+        if session is not None:
             for message in session.messages:
-                with st.chat_message(message['role'], 
-                        avatar='ui/ai.png' if message['role'] == 'assistant' else ('ui/user.png' if message['role'] == 'user' else None)):
+                with st.chat_message(message['role'],
+                                     avatar='ui/ai.png' if message['role'] == 'assistant'
+                                     else ('ui/user.png' if message['role'] == 'user' else None)):
                     st.markdown(message['content'])
 
         if session.messages and session.messages[-1]['role'] == 'user':
             with st.chat_message('assistant', avatar='ui/ai.png'):
-                get_ai_reply(util.create_client(model) , model, session, None)
+                get_ai_reply(util.create_client(model), model, session, None)
             st.rerun()
         if prompt := st.chat_input('What is up?'):
             st.session_state['prompt_for_tokenizer'] = None
@@ -78,12 +82,12 @@ def show_chat(session: state.ChatSession, model: state.Model):
                 st.markdown(prompt)
 
             with st.chat_message('assistant', avatar='ui/ai.png'):
-                get_ai_reply(util.create_client(model) , model, session, prompt)
+                get_ai_reply(util.create_client(model), model, session, prompt)
             st.rerun()
         else:
-            st.session_state['prompt_for_tokenizer'] = None 
+            st.session_state['prompt_for_tokenizer'] = None
     except Exception as e:
-        st.error(f"An error occurred while sending Chat API request")
-        st.text({e})
+        st.error('An error occurred while sending Chat API request')
+        st.text(e)
 
     embed_chat_input_handler_js()

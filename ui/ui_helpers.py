@@ -10,6 +10,7 @@ from streamlit.components.v1 import html
 #     </style>
 #     """, unsafe_allow_html=True)
 
+
 def register_button_as_link():
     st.markdown("""
     <style>
@@ -21,6 +22,7 @@ def register_button_as_link():
         }
     </style>
     """, unsafe_allow_html=True)
+
 
 def sidebar_link():
     st.markdown("""
@@ -56,11 +58,9 @@ def login_background():
 
 
 def right_align_2nd_col():
-    st.markdown(
-    """
+    st.markdown("""
     <style>
-        div[data-testid="column"]:nth-of-type(2) p
-        {
+        div[data-testid="column"]:nth-of-type(2) p {
             font-family: monospace;
             text-align: end;
             position: fixed;
@@ -77,9 +77,10 @@ def right_align_2nd_col():
             padding-top: 5px;
             padding-bottom: 5px;
             mask-image: radial-gradient(circle, rgba(0,0,0,1) 85%, transparent 100%);
-        } 
+        }
     </style>
-    """,unsafe_allow_html=True)
+    """, unsafe_allow_html=True)
+
 
 def hide_streamlit_toolbar():
     """
@@ -92,6 +93,7 @@ def hide_streamlit_toolbar():
         }
     </style>
     """, unsafe_allow_html=True)
+
 
 def add_theme_customizations():
     """
@@ -122,7 +124,8 @@ def hide_streamlit_menu():
         #stDecoration {display:none;}
     </style>
 """, unsafe_allow_html=True)
-    
+
+
 def hide_tokinzer_workaround_form():
     st.markdown("""
     <style>
@@ -141,7 +144,7 @@ def hide_tokinzer_workaround_form():
     </style>
 """, unsafe_allow_html=True)
 
-    
+
 def embed_chat_input_handler_js():
     js = """
 <script>
@@ -156,12 +159,12 @@ setInterval(() => {
   if (originalTextArea && formInput && formButton) {
     if (originalTextArea.value !== previousValue) {
       console.log("Chat input text changed");
-      
+
       const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
       nativeInputValueSetter.call(formInput, originalTextArea.value);
       const event = new Event('input', { bubbles: true });
       formInput.dispatchEvent(event);
-      
+
       previousValue = originalTextArea.value;
 
       setTimeout(() => {
@@ -177,4 +180,3 @@ console.log("Chat input handler is active");
 </script>
     """
     html(js, 0, 0, False)
-    #st.markdown(js,unsafe_allow_html=True)

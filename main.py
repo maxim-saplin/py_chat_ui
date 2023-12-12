@@ -4,7 +4,6 @@ import streamlit as st
 from logic.user_state import init
 from ui.login import authenticate, show_logout, get_user_name, get_enc_key
 from ui.home import show_home
-from logic.crypto import *
 from ui.ui_helpers import hide_streamlit_menu, hide_streamlit_toolbar
 
 import time
@@ -16,13 +15,12 @@ st.set_page_config(
     page_icon='ツ'
 )
 
-st.session_state['version'] = __version__;
+st.session_state['version'] = __version__
 
 hide_streamlit_menu()
 hide_streamlit_toolbar()
-#add_theme_customizations()
 
-if auth:=authenticate():
+if auth := authenticate():
     user = get_user_name()
     if user is not None:
         try:

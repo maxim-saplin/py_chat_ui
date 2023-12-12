@@ -5,7 +5,8 @@ import logic.user_state as state
 from ui.chat_session import show_chat
 from ui.new_chat import start_new_chat
 from ui.settings import manage_models
-from ui.ui_helpers import *
+from ui.ui_helpers import right_align_2nd_col, sidebar_link
+
 
 def show_home(show_logout: callable) -> None:
     # Right align token counter
@@ -28,15 +29,20 @@ def show_home(show_logout: callable) -> None:
 
     # Get Chat session
     if st.session_state['chat_session_id'] is not None:
-        session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])    
-    else: session = None
+        session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
+    else:
+        session = None
 
     # Set current view
     if 'selected_menu' not in st.session_state:
         if st.session_state['chat_session_id'] is not None and session is not None:
             st.session_state['selected_menu'] = f'{session.title} ({session.session_id})'
         else:
-            st.session_state['selected_menu'] = NavMenuOptions.NEW.value if state.model_repository.models else NavMenuOptions.SETTINGS.value
+            st.session_state['selected_menu'] = (
+                NavMenuOptions.NEW.value
+                if state.model_repository.models
+                else NavMenuOptions.SETTINGS.value
+            )
 
     def get_model() -> state.Model | None:
         return state.model_repository.get_last_used_model()
@@ -48,15 +54,16 @@ def show_home(show_logout: callable) -> None:
         sessions = state.session_manager.list_sessions()
         session_names = [f'{session.title} ({session.session_id})' for session in sessions]
         model_available = True if get_model() else False
-        menu_options =  session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value] if model_available else session_names + [NavMenuOptions.SETTINGS.value]
+        menu_options = (session_names + [NavMenuOptions.SETTINGS.value] + [NavMenuOptions.NEW.value]
+                        if model_available else session_names + [NavMenuOptions.SETTINGS.value])
         st.session_state['selected_menu'] = option_menu(
-            None, 
-            menu_options, 
+            None,
+            menu_options,
             styles={
                 "nav": {"font-family": "monospace;"},
             },
-            icons=[''] * len(session_names) + ['gear'] + ['plus']*model_available, menu_icon='cast', 
-            default_index= 0 if session_names else 1 if model_available else 0)
+            icons=[''] * len(session_names) + ['gear'] + ['plus']*model_available, menu_icon='cast',
+            default_index=0 if session_names else 1 if model_available else 0)
         if st.session_state['selected_menu'] in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
             st.session_state['chat_session_id'] = None
             session = None
@@ -65,24 +72,24 @@ def show_home(show_logout: callable) -> None:
             session_id = int(session_id_str.rstrip(')'))
             st.session_state['chat_session_id'] = session_id
             session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
-        
+
         sidebar_link()
         st.markdown('[[?]](https://github.com/maxim-saplin/py_chat_ui/tree/main) · '+st.session_state['version']+' · ツ')
 
-    #### Settings
+    # Settings
     if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
         state_updates = manage_models(
             state.model_repository
         )
-    
+
         apply_to_st_session(state_updates)
         if st.session_state['models_changed']:
-           st.rerun()
-                
-    #### New Chat
-    elif st.session_state['selected_menu'] == NavMenuOptions.NEW.value: 
+            st.rerun()
+
+    # New Chat
+    elif st.session_state['selected_menu'] == NavMenuOptions.NEW.value:
         st.session_state['prompt'] = None
-        
+
         state_updates = start_new_chat(
             state.model_repository,
             state.session_manager,
@@ -92,11 +99,12 @@ def show_home(show_logout: callable) -> None:
 
         apply_to_st_session(state_updates)
         if st.session_state['prompt']:
-           st.rerun()
-            
-    #### Chat session/Dialog
+            st.rerun()
+
+    # Chat session/Dialog
     else:
         show_chat(session, get_model())
+
 
 def apply_to_st_session(state_updates):
     for key, value in state_updates.items():

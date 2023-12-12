@@ -3,24 +3,27 @@ import datetime
 import pickle
 import glob
 from cryptography.fernet import InvalidToken
-from logic.crypto import *
-from logic.env_vars import *
+from logic.crypto import decrypt_data, encrypt_data
+from logic.env_vars import ApiTypeOptions
+from logic.env_vars import (CHATS_FOLDER, MODELS_FILE_NAME, env_data_folder, env_model_alias,
+                            env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
 
 # Current users home holder to store all data, must be set
 user_dir: str = None
 # Encryption key used to encrypt/decryp all user data coming to/from disk
 encryption_key: bytes = None
 
+
 class Model:
-    def __init__(self, 
-                 alias: str, 
-                 deployment_name: str, 
-                 api_key: str, 
-                 api_type: ApiTypeOptions, 
-                 api_version: str, 
-                 api_base: str, 
-                 temperature: float, 
-                 is_env: bool = False):       
+    def __init__(self,
+                 alias: str,
+                 deployment_name: str,
+                 api_key: str,
+                 api_type: ApiTypeOptions,
+                 api_version: str,
+                 api_base: str,
+                 temperature: float,
+                 is_env: bool = False):
         self.alias = alias
         self.model_or_deployment_name = deployment_name
         self.api_key = api_key
@@ -110,6 +113,7 @@ class Model:
             raise TypeError("Expected is_env to be a boolean")
         self._is_env = value
 
+
 class ModelRepository:
     def __init__(self):
         self.models: list[Model] = []
@@ -120,15 +124,32 @@ class ModelRepository:
         try:
             with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'rb') as f:
                 encrypted_data = f.read()
-                self.models, self.last_used_model, self.last_used_deployment = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                self.models,
+                self.last_used_model,
+                self.last_used_deployment = pickle.loads(decrypt_data(encrypted_data, encryption_key))
         except FileNotFoundError:
             pass
         except InvalidToken:
-            raise Exception("Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
+            raise Exception(
+                "Failed to decrypt the model data. The encryption key may be incorrect or the data is corrupted.")
 
-    def add_env(self, env_model_alias: str, env_deployment_name: str, env_api_key: str, env_api_type: str, env_api_version: str, env_api_base: str, env_temperature: float) -> None:
+    def add_env(self,
+                env_model_alias: str,
+                env_deployment_name: str,
+                env_api_key: str,
+                env_api_type: str,
+                env_api_version: str,
+                env_api_base: str,
+                env_temperature: float) -> None:
         if not any(model.alias == env_model_alias for model in self.models):
-            model = Model(env_model_alias, env_deployment_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature, True)
+            model = Model(env_model_alias,
+                          env_deployment_name,
+                          env_api_key,
+                          env_api_type,
+                          env_api_version,
+                          env_api_base,
+                          env_temperature,
+                          True)
             self.models.append(model)
             self.save()
 
@@ -141,14 +162,14 @@ class ModelRepository:
             if model.alias == model_alias:
                 return model
         return None
-    
+
     def get_last_used_model(self) -> Model | None:
         if self.last_used_model and self.get_model_by_alias(self.last_used_model):
             return self.get_model_by_alias(self.last_used_model)
         elif self.models:
             return self.models[0]
         return None
-    
+
     def set_last_used_model_alias(self, model_alias: str) -> None:
         self.last_used_model = model_alias
         self.save()
@@ -167,7 +188,7 @@ class ModelRepository:
                     self.last_used_model = model.alias
                 self.models[i] = model
                 break
-        
+
         self.save()
 
     def list(self) -> list[str]:
@@ -176,8 +197,11 @@ class ModelRepository:
     def save(self) -> None:
         os.makedirs(os.path.join(env_data_folder, user_dir), exist_ok=True)
         with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
-            encrypted_data = encrypt_data(pickle.dumps((self.models, self.last_used_model, self.last_used_deployment)), encryption_key)
+            encrypted_data = encrypt_data(
+                pickle.dumps((self.models, self.last_used_model, self.last_used_deployment)),
+                encryption_key)
             f.write(encrypted_data)
+
 
 class ChatSession:
     def __init__(self, session_id: int, model: Model, title: str):
@@ -187,7 +211,8 @@ class ChatSession:
         self.title: str = title
         self.start_date: datetime.datetime = datetime.datetime.now()
         self.messages: list[dict] = []
-        base_file_path = os.path.join(env_data_folder, user_dir, CHATS_FOLDER, f"{self.start_date.strftime('%Y%m%d%H%M%S%f')}_{self.session_id}")
+        base_file_path = os.path.join(env_data_folder, user_dir, CHATS_FOLDER,
+                                      f"{self.start_date.strftime('%Y%m%d%H%M%S%f')}_{self.session_id}")
         self.file_path: str = f"{base_file_path}.pkl"
         self.messages_file_path: str = f"{base_file_path}_messages.pkl"
         os.makedirs(os.path.dirname(self.file_path), exist_ok=True)
@@ -252,7 +277,9 @@ class ChatSession:
                 return chat_session
         except InvalidToken:
             # Handle the case where the session data cannot be decrypted
-            raise ValueError("Unable to decrypt the session data. The encryption key may be incorrect or the data is corrupted.")
+            raise ValueError(
+                "Unable to decrypt the session data. The encryption key may be incorrect or the data is corrupted.")
+
 
 class ChatSessionManager:
     def __init__(self):
@@ -268,7 +295,7 @@ class ChatSessionManager:
 
     def list_sessions(self) -> list[ChatSession]:
         return sorted(self.sessions, key=lambda s: s.start_date, reverse=True)
-    
+
     def get_session_by_id(self, session_id: int) -> ChatSession | None:
         for session in self.sessions:
             if session.session_id == session_id:
@@ -284,6 +311,7 @@ class ChatSessionManager:
                     self.sessions.append(session)
                 except (EOFError, pickle.UnpicklingError):
                     continue
+
     def delete(self, session_id: int) -> None:
         session = self.get_session_by_id(session_id)
         if session:
@@ -293,8 +321,10 @@ class ChatSessionManager:
             if os.path.exists(session.messages_file_path):
                 os.remove(session.messages_file_path)
 
+
 model_repository: ModelRepository = None
 session_manager: ChatSessionManager = None
+
 
 def init(username: str, enc_key) -> None:
     global user_dir
@@ -304,7 +334,7 @@ def init(username: str, enc_key) -> None:
     import re
 
     # Define a function to escape the username to be used as a valid folder name
-    def escape_username(username: str) -> str:        
+    def escape_username(username: str) -> str:
         return re.sub(r"[^a-zA-Z0-9_-]", "_", username)
 
     if not re.match(r"^[a-zA-Z0-9_-]{1,20}$", username) and not ("@" in username and 2 < len(username) < 320):
@@ -316,5 +346,6 @@ def init(username: str, enc_key) -> None:
     model_repository = ModelRepository()
     model_repository.load()
     if env_model_alias:
-        model_repository.add_env(env_model_alias, env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
+        model_repository.add_env(env_model_alias, env_model_name, env_api_key,
+                                 env_api_type, env_api_version, env_api_base, env_temperature)
     session_manager = ChatSessionManager()

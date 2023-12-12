@@ -4,8 +4,8 @@ import logic.user_state as state
 
 def manage_models(model_repository: state.ModelRepository) -> dict:
     """
-    Returns 'models_changed': True is there're any write ioperations hapenning inside (e.g. adding, deleteting, updating) - might 
-    want to do upstream refresh
+    Returns 'models_changed': True is there're any write ioperations hapenning inside
+    (e.g. adding, deleteting, updating) - might want to do upstream refresh
     """
     ADD_NEW_MODEL_TEXT = '+ Add New Model'
 
@@ -19,34 +19,48 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
         st.session_state['settings_selected_index'] = 0
 
     old_index = st.session_state['settings_selected_index']
-    selected_model_alias = st.selectbox('Select Model', model_options, index=st.session_state['settings_selected_index'])
+    selected_model_alias = st.selectbox('Select Model', model_options,
+                                        index=st.session_state['settings_selected_index'])
     st.session_state['settings_selected_index'] = model_options.index(selected_model_alias)
     if old_index != st.session_state['settings_selected_index']:
         st.rerun()
-    selected_model = next((model for model in state.model_repository.models if model.alias == selected_model_alias), None)
+    selected_model = next((
+        model for model in state.model_repository.models if model.alias == selected_model_alias), None)
     is_env_model = selected_model.is_env if selected_model else False
 
     is_new_model = selected_model_alias == ADD_NEW_MODEL_TEXT
     is_fake_type = selected_model.api_type == state.ApiTypeOptions.FAKE if selected_model else False
-    st.subheader('Fake Model Settings' if is_fake_type else ADD_NEW_MODEL_TEXT if is_new_model else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
+    st.subheader('Fake Model Settings' if is_fake_type else ADD_NEW_MODEL_TEXT if is_new_model
+                 else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
 
     api_type_options = [state.ApiTypeOptions.AZURE, state.ApiTypeOptions.OPENAI]
-    api_type_index = api_type_options.index(selected_model.api_type) if selected_model and selected_model.api_type in api_type_options else 0
-    api_type = st.selectbox('API Type', 
-                    [option.value for option in api_type_options], 
-                    index=api_type_index, 
-                    disabled=is_env_model or is_fake_type)
+    api_type_index = api_type_options.index(
+        selected_model.api_type) if selected_model and selected_model.api_type in api_type_options else 0
+    api_type = st.selectbox('API Type', [option.value for option in api_type_options],
+                            index=api_type_index, disabled=is_env_model or is_fake_type)
     api_type = state.ApiTypeOptions.from_string(api_type)
 
-    selected_model_alias = st.text_input('Model Alias (Display Name)', value=selected_model_alias if not is_new_model else '', disabled=is_env_model or is_fake_type)
+    selected_model_alias = st.text_input(
+        'Model Alias (Display Name)', value=selected_model_alias if not is_new_model
+        else '', disabled=is_env_model or is_fake_type)
+
     is_openai_type = api_type == state.ApiTypeOptions.OPENAI
 
-    model_or_deployment_name = st.text_input('Model Name (e.g. "gpt-3.5-turbo-0613")', value=selected_model.model_or_deployment_name if not is_new_model else '', disabled=is_env_model or is_fake_type)
-    api_key = st.text_input('API Key', selected_model.api_key if selected_model else '', disabled=is_env_model or is_fake_type)
-    api_version = st.text_input('API Version (e.g. "2023-07-01-preview")', selected_model.api_version if selected_model else '', disabled=is_env_model or is_openai_type or is_fake_type)
-    api_base = st.text_input('API Base (e.g. "https://my_model.openai.azure.com")', selected_model.api_base if selected_model else '', disabled=is_env_model or is_openai_type or is_fake_type)
-    temperature = st.slider(f'Temperature', 0.0, 1.0, 
-                            selected_model.temperature if selected_model else 0.7, 0.01, 
+    model_or_deployment_name = st.text_input(
+        'Model Name (e.g. "gpt-3.5-turbo-0613")',
+        value=selected_model.model_or_deployment_name if not is_new_model else '',
+        disabled=is_env_model or is_fake_type)
+
+    api_key = st.text_input('API Key',
+                            selected_model.api_key if selected_model else '', disabled=is_env_model or is_fake_type)
+    api_version = st.text_input('API Version (e.g. "2023-07-01-preview")',
+                                selected_model.api_version if selected_model else '',
+                                disabled=is_env_model or is_openai_type or is_fake_type)
+    api_base = st.text_input('API Base (e.g. "https://my_model.openai.azure.com")',
+                             selected_model.api_base if selected_model else '',
+                             disabled=is_env_model or is_openai_type or is_fake_type)
+    temperature = st.slider('Temperature', 0.0, 1.0,
+                            selected_model.temperature if selected_model else 0.7, 0.01,
                             disabled=is_env_model or is_fake_type)
 
     # Validation summary
@@ -72,10 +86,11 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
                 try:
                     if selected_model_alias in get_model_options():
                         raise ValueError(f"The model alias '{selected_model_alias}' already exists.")
-                    model = state.Model(selected_model_alias, model_or_deployment_name, api_key, api_type, api_version, api_base, temperature)
+                    model = state.Model(selected_model_alias, model_or_deployment_name,
+                                        api_key, api_type, api_version, api_base, temperature)
                     state.model_repository.add(model)
                     st.success('Model added successfully!')
-                    selected_model_alias = model.alias 
+                    selected_model_alias = model.alias
                     st.session_state['settings_selected_index'] = get_model_options().index(selected_model_alias)
                     models_changed = True
                 except Exception as e:
@@ -94,7 +109,7 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
                         selected_model.api_base = api_base
                         selected_model.temperature = temperature
                         state.model_repository.update(old_alias, selected_model)
-                        selected_model_alias = selected_model.alias 
+                        selected_model_alias = selected_model.alias
                         st.success('Model updated successfully!')
                         st.session_state['settings_selected_index'] = get_model_options().index(selected_model_alias)
                         models_changed = True
@@ -103,10 +118,8 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
             if st.button('Delete Model'):
                 try:
                     state.model_repository.delete(selected_model.alias)
-                    #st.success('Model deleted successfully!')
                     models_changed = True
                     st.session_state['settings_selected_index'] = 0
-                    #st.rerun()
                 except Exception as e:
                     st.error(f"Failed to delete model: {e}")
     return {
