@@ -298,7 +298,7 @@ class Authenticate:
             else:
                 raise CredentialsError
     
-    def _register_credentials(self, username: str, name: str, password: str, email: str, preauthorization: bool):
+    def _register_credentials(self, username: str, name: str, password: str, email: str, preauthorization: bool, skipEmail: bool = False):
         """
         Adds to credentials dictionary the new user's information.
 
@@ -316,19 +316,20 @@ class Authenticate:
             The preauthorization requirement, True: user must be preauthorized to register, 
             False: any user can register.
         """
-        if not self.validator.validate_username(username):
+        if not self.validator.validate_username(username, skipEmail):
             raise RegisterError('Username is not valid')
-        if not self.validator.validate_name(name):
-            raise RegisterError('Name is not valid')
-        if not self.validator.validate_email(email):
-            raise RegisterError('Email is not valid')
+        if not skipEmail:
+            if not self.validator.validate_name(name):
+                raise RegisterError('Name is not valid')
+            if not self.validator.validate_email(email):
+                raise RegisterError('Email is not valid')
 
         self.credentials['usernames'][username] = {'name': name, 
             'password': Hasher([password]).generate()[0], 'email': email}
         if preauthorization:
             self.preauthorized['emails'].remove(email)
 
-    def register_user(self, form_name: str, location: str='main', preauthorization=True) -> bool:
+    def register_user(self, form_name: str, location: str='main', preauthorization=True, skipEmail=False) -> bool:
         """
         Creates a register new user widget.
 
@@ -341,11 +342,15 @@ class Authenticate:
         preauthorization: bool
             The preauthorization requirement, True: user must be preauthorized to register, 
             False: any user can register.
+        skippEmail: bool
+            Don't show email and name field, only use username, username can now accept emails
         Returns
         -------
         bool
             The status of registering the new user, True: user registered successfully.
         """
+        if preauthorization and skipEmail:
+            raise ValueError("preauthorization and skipEmail cannot both be True")
         if preauthorization:
             if not self.preauthorized:
                 raise ValueError("preauthorization argument must not be None")
@@ -357,31 +362,40 @@ class Authenticate:
             register_user_form = st.sidebar.form('Register user')
 
         register_user_form.subheader(form_name)
-        new_email = register_user_form.text_input('Email')
+        if not skipEmail:
+            new_email = register_user_form.text_input('Email')
         new_username = register_user_form.text_input('Username').lower()
-        new_name = register_user_form.text_input('Name')
+        if not skipEmail:
+            new_name = register_user_form.text_input('Name')
         new_password = register_user_form.text_input('Password', type='password')
         new_password_repeat = register_user_form.text_input('Repeat password', type='password')
 
         if register_user_form.form_submit_button('Register'):
-            if len(new_email) and len(new_username) and len(new_name) and len(new_password) > 0:
-                if new_username not in self.credentials['usernames']:
-                    if new_password == new_password_repeat:
-                        if preauthorization:
-                            if new_email in self.preauthorized['emails']:
-                                self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
-                                return True
-                            else:
-                                raise RegisterError('User not preauthorized to register')
-                        else:
+            if not skipEmail and (len(new_email) == 0 or len(new_name) == 0):
+                raise RegisterError('Please enter an email and name')
+            if len(new_username) == 0 or len(new_password) == 0:
+                raise RegisterError('Please enter a username and password')
+            if new_username not in self.credentials['usernames']:
+                if new_password == new_password_repeat:
+                    if preauthorization:
+                        if not skipEmail and new_email in self.preauthorized['emails']:
                             self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
                             return True
+                        elif skipEmail:
+                            self._register_credentials(new_username, '', new_password, '', preauthorization, True)
+                            return True
+                        else:
+                            raise RegisterError('User not preauthorized to register')
                     else:
-                        raise RegisterError('Passwords do not match')
+                        if not skipEmail:
+                            self._register_credentials(new_username, new_name, new_password, new_email, preauthorization)
+                        else:
+                            self._register_credentials(new_username, '', new_password, '', preauthorization, True)
+                        return True
                 else:
-                    raise RegisterError('Username already taken')
+                    raise RegisterError('Passwords do not match')
             else:
-                raise RegisterError('Please enter an email, username, name, and password')
+                raise RegisterError('Username already taken')
 
     def _set_random_password(self, username: str) -> str:
         """

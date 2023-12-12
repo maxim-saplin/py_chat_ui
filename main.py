@@ -5,8 +5,6 @@ from ui.home import show_home
 from logic.crypto import *
 from ui.ui_helpers import add_theme_customizations, hide_streamlit_menu, hide_streamlit_toolbar
 
-# print('Py Chat, Request received')
-
 import time
 start_time = time.time()
 
@@ -27,7 +25,7 @@ if auth:=authenticate():
             init(user, get_enc_key())
             show_home(lambda: show_logout(auth))
         except Exception as e:
-            st.error(f'Error in main: {e}')
+            st.error(f'Error in the main loop: {e}')
             show_logout(auth)
             raise e
 

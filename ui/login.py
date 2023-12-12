@@ -5,11 +5,22 @@ import yaml
 from yaml.loader import SafeLoader
 from logic.env_vars import env_data_folder, env_disable_auth
 from logic.crypto import generate_fernet_key
+from ui.ui_helpers import register_button_as_link
 
 users_file: str = os.path.join(env_data_folder, 'users.yaml')
 
 # Load the configuration file with the user credentials
 if not env_disable_auth:
+    if not os.path.exists(users_file):
+        with open(users_file, 'w') as file:
+            file.write("""
+credentials:
+  usernames:
+cookie:
+  expiry_days: 30
+  key: 856_some_$0-signature_key
+  name: strmlt-pld
+""")
     with open(users_file) as file:
         config = yaml.load(file, Loader=SafeLoader)
 
@@ -46,15 +57,41 @@ def authenticate() -> stauth.Authenticate | str | None:
 
     authenticator._check_cookie()
 
+    
+
     if st.session_state.get("authentication_status", None):
         return authenticator
     else:
-        # Call generate_fernet_key insternally, pass user name and passwrod and keep the key in server cookies
-        authenticator.login('', 'main', generate_fernet_key)
-        if st.session_state["authentication_status"] is False:
-            st.error('Username/password is incorrect')
-        elif st.session_state["authentication_status"] is None:
-            st.warning('Please enter your username and password')
+        if 'view_mode' not in st.session_state:
+            st.session_state['view_mode'] = 'login'
+
+        register_button_as_link()
+
+        if st.session_state['view_mode'] == 'login':
+            if st.button('Register a new user'):
+                st.session_state['view_mode'] = 'register'
+                st.rerun()
+            # Call generate_fernet_key insternally, pass user name and passwrod and keep the key in server cookies
+            authenticator.login('', 'main', generate_fernet_key)
+
+        elif st.session_state['view_mode'] == 'register':
+            if st.button('⇠ Back to login'):
+                st.session_state['view_mode'] = 'login'
+                st.rerun()
+            try:
+                if authenticator.register_user('Register a new user', preauthorization=False, skipEmail=True):
+                    st.success('User registered successfully')
+                    st.session_state['view_mode'] = 'login'
+            except Exception as e:
+                st.error(e)
+
+        else:
+            if st.session_state["authentication_status"] is False:
+                st.error('Username/password is incorrect')
+        
+
+        # elif st.session_state["authentication_status"] is None:
+        #     st.warning('Please enter your username and password')
         return None
 
 def get_user_name() -> str | None:

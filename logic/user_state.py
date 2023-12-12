@@ -205,16 +205,22 @@ class ChatSessionManager:
 model_repository: ModelRepository = None
 session_manager: ChatSessionManager = None
 
-def init(user_direrctory: str, enc_key) -> None:
+def init(username: str, enc_key) -> None:
     global user_dir
     global encryption_key
     global model_repository
     global session_manager
-    if not user_direrctory.isidentifier():
-        raise ValueError("Invalid user directory name; It must start with a letter (a-z, A-Z) or an underscore () and can be followed by any number of letters, digits (0-9), or underscores")
+    import re
+
+    # Define a function to escape the username to be used as a valid folder name
+    def escape_username(username: str) -> str:        
+        return re.sub(r"[^a-zA-Z0-9_-]", "_", username)
+
+    if not re.match(r"^[a-zA-Z0-9_-]{1,20}$", username) and not ("@" in username and 2 < len(username) < 320):
+        raise ValueError("Invalid username; it must be a valid string with 1-20 characters, or a valid email address.")
     if not enc_key:
         raise ValueError("Encryption key is not set.")
-    user_dir = user_direrctory
+    user_dir = escape_username(username)
     encryption_key = enc_key
     model_repository = ModelRepository()
     model_repository.load()

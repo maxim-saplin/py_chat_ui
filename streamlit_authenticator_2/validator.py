@@ -5,7 +5,7 @@ class Validator:
     This class will check the validity of the entered username, name, and email for a 
     newly registered user.
     """
-    def validate_username(self, username: str) -> bool:
+    def validate_username(self, username: str, canBeEmail:bool = False) -> bool:
         """
         Checks the validity of the entered username.
 
@@ -19,7 +19,7 @@ class Validator:
             Validity of entered username.
         """
         pattern = r"^[a-zA-Z0-9_-]{1,20}$"
-        return bool(re.match(pattern, username))
+        return bool(re.match(pattern, username)) or ("@" in username and 2 < len(username) < 320 and canBeEmail)
 
     def validate_name(self, name: str) -> bool:
         """

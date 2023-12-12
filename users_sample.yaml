@@ -16,3 +16,5 @@ cookie:
 preauthorized:
   emails:
   - test@gmail.com
+
+  # For more details check https://github.com/mkhorasani/Streamlit-Authenticator

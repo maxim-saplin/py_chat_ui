@@ -1,6 +1,18 @@
 import streamlit as st
 from streamlit.components.v1 import html
 
+def register_button_as_link():
+    st.markdown("""
+    <style>
+        div.row-widget button[kind="secondary"] {
+            text-decoration: underline;
+            cursor: pointer;
+            border: none;
+            background-color: transparent;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+
 def right_align_2nd_col():
     st.markdown(
     """
