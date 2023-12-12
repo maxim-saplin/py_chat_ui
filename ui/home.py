@@ -20,21 +20,11 @@ def show_home(show_logout: callable) -> None:
         'system_message': 'You are an AI assistant capable of chained reasoning as humans do',
         'prompt': '',
         'chat_session_id': None,
-        'selected_model_alias': None,
-        'selected_model_alias_in_settings': None,
         'selected_menu': None,
     }
     for key, default_value in session_state_defaults.items():
         if key not in st.session_state:
             st.session_state[key] = default_value
-
-    # Get selected Model Name
-    if st.session_state['selected_model_alias'] is None:
-        model = state.model_repository.get_last_used_model()
-        if model is not None:
-            st.session_state['selected_model_alias'] = model.alias
-        else:
-            st.session_state['selected_model_alias'] = None
 
     # Get Chat session
     if st.session_state['chat_session_id'] is not None:
@@ -49,9 +39,7 @@ def show_home(show_logout: callable) -> None:
             st.session_state['selected_menu'] = NavMenuOptions.NEW.value if state.model_repository.models else NavMenuOptions.SETTINGS.value
 
     def get_model() -> state.Model | None:
-        if st.session_state['selected_model_alias']:
-            return state.model_repository.get_model_by_alias(st.session_state['selected_model_alias'])
-        return None
+        return state.model_repository.get_last_used_model()
 
     # App Navigation
     with st.sidebar:
@@ -82,7 +70,6 @@ def show_home(show_logout: callable) -> None:
     #### Settings
     if st.session_state['selected_menu'] == NavMenuOptions.SETTINGS.value:
         state_updates = manage_models(
-            st.session_state['selected_model_alias_in_settings'],
             state.model_repository
         )
     
@@ -97,7 +84,6 @@ def show_home(show_logout: callable) -> None:
         state_updates = start_new_chat(
             state.model_repository,
             state.session_manager,
-            st.session_state['selected_model_alias'],
             st.session_state['system_message'],
             get_model().temperature,
         )

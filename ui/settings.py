@@ -2,21 +2,31 @@ import streamlit as st
 import logic.user_state as state
 
 
-def manage_models(selected_model_alias_in_settings: str, model_repository: state.ModelRepository) -> dict:
+def manage_models(model_repository: state.ModelRepository) -> dict:
     """
     Returns 'models_changed': True is there're any write ioperations hapenning inside (e.g. adding, deleteting, updating) - might 
     want to do upstream refresh
     """
     ADD_NEW_MODEL_TEXT = '+ Add New Model'
+
+    def get_model_options():
+        return [ADD_NEW_MODEL_TEXT] + [model.alias for model in model_repository.models]
+
     models_changed = False
     st.title('Manage Models')
-    model_options = [ADD_NEW_MODEL_TEXT] + [model.alias for model in model_repository.models]
-    model_selected_index = model_options.index(selected_model_alias_in_settings) if selected_model_alias_in_settings in model_options else 0
-    selected_model_alias_in_settings = st.selectbox('Select Model', model_options)
-    selected_model = next((model for model in state.model_repository.models if model.alias == selected_model_alias_in_settings), None)
+    model_options = get_model_options()
+    if 'settings_selected_index' not in st.session_state:
+        st.session_state['settings_selected_index'] = 0
+
+    old_index = st.session_state['settings_selected_index']
+    selected_model_alias = st.selectbox('Select Model', model_options, index=st.session_state['settings_selected_index'])
+    st.session_state['settings_selected_index'] = model_options.index(selected_model_alias)
+    if old_index != st.session_state['settings_selected_index']:
+        st.rerun()
+    selected_model = next((model for model in state.model_repository.models if model.alias == selected_model_alias), None)
     is_env_model = selected_model.is_env if selected_model else False
 
-    is_new_model = selected_model_alias_in_settings == ADD_NEW_MODEL_TEXT
+    is_new_model = selected_model_alias == ADD_NEW_MODEL_TEXT
     is_fake_type = selected_model.api_type == state.ApiTypeOptions.FAKE if selected_model else False
     st.subheader('Fake Model Settings' if is_fake_type else ADD_NEW_MODEL_TEXT if is_new_model else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
 
@@ -28,7 +38,7 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
                     disabled=is_env_model or is_fake_type)
     api_type = state.ApiTypeOptions.from_string(api_type)
 
-    selected_model_alias_in_settings = st.text_input('Model Alias (Display Name)', value=selected_model_alias_in_settings if not is_new_model else '', disabled=is_env_model or is_fake_type)
+    selected_model_alias = st.text_input('Model Alias (Display Name)', value=selected_model_alias if not is_new_model else '', disabled=is_env_model or is_fake_type)
     is_openai_type = api_type == state.ApiTypeOptions.OPENAI
 
     model_or_deployment_name = st.text_input('Model Name (e.g. "gpt-3.5-turbo-0613")', value=selected_model.model_or_deployment_name if not is_new_model else '', disabled=is_env_model or is_fake_type)
@@ -60,10 +70,13 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
         if st.button('Add Model'):
             if not errors:
                 try:
-                    model = state.Model(selected_model_alias_in_settings, model_or_deployment_name, api_key, api_type, api_version, api_base, temperature)
+                    if selected_model_alias in get_model_options():
+                        raise ValueError(f"The model alias '{selected_model_alias}' already exists.")
+                    model = state.Model(selected_model_alias, model_or_deployment_name, api_key, api_type, api_version, api_base, temperature)
                     state.model_repository.add(model)
                     st.success('Model added successfully!')
-                    selected_model_alias_in_settings = model.alias 
+                    selected_model_alias = model.alias 
+                    st.session_state['settings_selected_index'] = get_model_options().index(selected_model_alias)
                     models_changed = True
                 except Exception as e:
                     st.error(f"Failed to add model: {e}")
@@ -72,29 +85,30 @@ def manage_models(selected_model_alias_in_settings: str, model_repository: state
             if st.button('Update Model'):
                 if not errors:
                     try:
-                        selected_model.alias = selected_model_alias_in_settings
+                        old_alias = selected_model.alias
+                        selected_model.alias = selected_model_alias
                         selected_model.model_or_deployment_name = model_or_deployment_name
                         selected_model.api_key = api_key
                         selected_model.api_type = api_type
                         selected_model.api_version = api_version
                         selected_model.api_base = api_base
                         selected_model.temperature = temperature
-                        state.model_repository.update(selected_model)
-                        selected_model_alias_in_settings = selected_model.alias 
+                        state.model_repository.update(old_alias, selected_model)
+                        selected_model_alias = selected_model.alias 
                         st.success('Model updated successfully!')
+                        st.session_state['settings_selected_index'] = get_model_options().index(selected_model_alias)
                         models_changed = True
                     except Exception as e:
                         st.error(f"Failed to update model: {e}")
             if st.button('Delete Model'):
                 try:
                     state.model_repository.delete(selected_model.alias)
-                    st.success('Model deleted successfully!')
-                    last_model = state.model_repository.get_last_used_model()
-                    selected_model_alias_in_settings = last_model.alias if last_model else None
+                    #st.success('Model deleted successfully!')
                     models_changed = True
+                    st.session_state['settings_selected_index'] = 0
+                    #st.rerun()
                 except Exception as e:
                     st.error(f"Failed to delete model: {e}")
     return {
-        'selected_model_alias_in_settings': selected_model_alias_in_settings,
         'models_changed': models_changed
     }

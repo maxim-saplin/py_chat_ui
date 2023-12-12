@@ -61,25 +61,29 @@ def show_chat(session: state.ChatSession, model: state.Model):
             else:
                 st.write(f"{model_alias} / {tokens}")
 
-    if session != None:
-        for message in session.messages:
-            with st.chat_message(message['role'], 
-                    avatar='ui/ai.png' if message['role'] == 'assistant' else ('ui/user.png' if message['role'] == 'user' else None)):
-                st.markdown(message['content'])
+    try:
+        if session != None:
+            for message in session.messages:
+                with st.chat_message(message['role'], 
+                        avatar='ui/ai.png' if message['role'] == 'assistant' else ('ui/user.png' if message['role'] == 'user' else None)):
+                    st.markdown(message['content'])
 
-    if session.messages and session.messages[-1]['role'] == 'user':
-        with st.chat_message('assistant', avatar='ui/ai.png'):
-            get_ai_reply(util.create_client(model) , model, session, None)
-        st.rerun()
-    if prompt := st.chat_input('What is up?'):
-        st.session_state['prompt_for_tokenizer'] = None
-        with st.chat_message('user', avatar='ui/user.png'):
-            st.markdown(prompt)
+        if session.messages and session.messages[-1]['role'] == 'user':
+            with st.chat_message('assistant', avatar='ui/ai.png'):
+                get_ai_reply(util.create_client(model) , model, session, None)
+            st.rerun()
+        if prompt := st.chat_input('What is up?'):
+            st.session_state['prompt_for_tokenizer'] = None
+            with st.chat_message('user', avatar='ui/user.png'):
+                st.markdown(prompt)
 
-        with st.chat_message('assistant', avatar='ui/ai.png'):
-            get_ai_reply(util.create_client(model) , model, session, prompt)
-        st.rerun()
-    else:
-        st.session_state['prompt_for_tokenizer'] = None 
+            with st.chat_message('assistant', avatar='ui/ai.png'):
+                get_ai_reply(util.create_client(model) , model, session, prompt)
+            st.rerun()
+        else:
+            st.session_state['prompt_for_tokenizer'] = None 
+    except Exception as e:
+        st.error(f"An error occurred while sending Chat API request")
+        st.text({e})
 
     embed_chat_input_handler_js()

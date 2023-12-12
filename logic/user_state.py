@@ -149,7 +149,7 @@ class ModelRepository:
             return self.models[0]
         return None
     
-    def set_last_used_model(self, model_alias: str) -> None:
+    def set_last_used_model_alias(self, model_alias: str) -> None:
         self.last_used_model = model_alias
         self.save()
 
@@ -160,11 +160,14 @@ class ModelRepository:
             self.last_used_deployment = ""
         self.save()
 
-    def update(self, model: Model) -> None:
+    def update(self, alias: str, model: Model) -> None:
         for i, m in enumerate(self.models):
-            if m.alias == model.alias:
+            if m.alias == alias:
+                if self.last_used_model == alias:
+                    self.last_used_model = model.alias
                 self.models[i] = model
                 break
+        
         self.save()
 
     def list(self) -> list[str]:

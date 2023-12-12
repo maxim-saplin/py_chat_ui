@@ -1,12 +1,14 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
 
-def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager, selected_model_alias: str, system_message: str, temperature: float) -> dict:
+def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager, system_message: str, temperature: float) -> dict:
     st.title('New Chat')
     model_options = [model.alias for model in model_repository.models]
-    selected_model_index = model_options.index(selected_model_alias) if selected_model_alias in model_options else 0
-    selected_model_alias = st.selectbox('Model', model_options, index=selected_model_index)
+    selected_model_alias = model_repository.get_last_used_model().alias
+    selected_model_alias = st.selectbox('Model', model_options)
     model = model_repository.get_model_by_alias(selected_model_alias)
+    model_repository.set_last_used_model_alias(selected_model_alias)
+
     session = None            
     system_message = st.text_area('System message', st.session_state['system_message'])
     temperature = st.slider('Temperature', 0.0, 1.0, temperature, 0.01)
@@ -20,12 +22,10 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             session.add_message({'role': 'user', 'content': prompt})
             
             model.temperature = temperature
-            model_repository.update(model)
-            model_repository.set_last_used_model(model.alias)
-    
+            model_repository.update(model.alias, model)
+
     # Return the updated state
     state_update = {
-        'selected_model_alias': model.alias,
         'system_message': system_message,
         'temperature': temperature
     }
