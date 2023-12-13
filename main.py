@@ -1,14 +1,15 @@
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 import streamlit as st
 from logic.user_state import init
 from ui.login import authenticate, show_logout, get_user_name, get_enc_key
 from ui.home import show_home
 from ui.ui_helpers import global_ui_tweaks, hide_streamlit_menu, hide_streamlit_toolbar
-
 import time
-start_time = time.time()
 
+
+print('Py Chat, Request received')
+start_time = time.time()
 
 st.set_page_config(
     page_title='Py Chat',

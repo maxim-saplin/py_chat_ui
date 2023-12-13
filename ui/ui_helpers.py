@@ -30,7 +30,7 @@ def sidebar_about_link():
     <style>
         div[data-testid="stSidebarUserContent"] div.element-container:last-child  {
             position: fixed;
-            bottom: 30px;
+            top: 13px;
             opacity: 0.5;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
@@ -80,6 +80,15 @@ def right_align_2nd_col():
             padding-top: 5px;
             padding-bottom: 5px;
             mask-image: radial-gradient(circle, rgba(0,0,0,1) 85%, transparent 100%);
+            transition: opacity 100ms ease-in;
+            opacity: 0;
+            animation: fadeIn 100ms ease-in forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
         }
     </style>
     """, unsafe_allow_html=True)
@@ -158,36 +167,86 @@ def chat_bottom_padding():
     """, unsafe_allow_html=True)
 
 
-def embed_chat_input_handler_js():
+def stop_generation_button_styles():
+    st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton {
+                text-align: center;
+                position: fixed;
+                bottom: 31px;
+                visibility: hidden;
+                z-index: 999;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
+def add_generation_marker():
+    st.markdown("""
+        <input type="hidden" id="generationInProgress">
+    """, unsafe_allow_html=True)
+
+
+def show_generate_button_js():
+    js = """
+<script>
+const stopButton = window.parent.document.querySelector(
+    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
+stopButton.style.visibility = 'visible';
+const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
+chatInputContainer.style.visibility = 'hidden';
+</script>
+    """
+    html(js, 0, 0, False)
+
+
+def show_generate_chat_input_js():
+    js = """
+<script>
+const stopButton = window.parent.document.querySelector(
+    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
+stopButton.style.visibility = 'hidden';
+const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
+chatInputContainer.style.visibility = 'visible';
+</script>
+    """
+    html(js, 0, 0, False)
+
+
+def embed_chat_input_js():
     js = """
 <script>
 console.log("Chat input handler is activating...");
 
 let previousValue = '';
+const originalTextArea = window.parent.document.querySelector('.stChatInputContainer textarea');
+const originalButton = window.parent.document.querySelector('.stChatInputContainer button');
+const formInput = window.parent.document.querySelector('div[data-testid="stForm"] input');
+const formButton = window.parent.document.querySelector('div[data-testid="stForm"] button');
 
-setInterval(() => {
-  const originalTextArea = window.parent.document.querySelector('.stChatInputContainer textarea');
-  const formInput = window.parent.document.querySelector('div[data-testid="stForm"] input');
-  const formButton = window.parent.document.querySelector('div[data-testid="stForm"] button');
-  if (originalTextArea && formInput && formButton) {
-    if (originalTextArea.value !== previousValue) {
-      console.log("Chat input text changed");
+originalButton.addEventListener('click', () => {
+  console.log('Button clicked with text:');
+});
 
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-      nativeInputValueSetter.call(formInput, originalTextArea.value);
-      const event = new Event('input', { bubbles: true });
-      formInput.dispatchEvent(event);
+originalTextArea.addEventListener('keyup', () => {
+    clearTimeout(window.debounceTimeout);
+    window.debounceTimeout = setTimeout(() => {
+        if (originalTextArea.value !== previousValue) {
+            console.log("Chat input text changed");
 
-      previousValue = originalTextArea.value;
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+            nativeInputValueSetter.call(formInput, originalTextArea.value);
+            const event = new Event('input', { bubbles: true });
+            formInput.dispatchEvent(event);
 
-      setTimeout(() => {
-          formButton.click();
-      }, 100);
-    }
-  } else {
-    console.log("Textarea or button not found");
-  }
-}, 1000);
+            previousValue = originalTextArea.value;
+
+            setTimeout(() => {
+                formButton.click();
+            }, 100);
+        }
+    }, 300);
+});
 
 console.log("Chat input handler is active");
 </script>

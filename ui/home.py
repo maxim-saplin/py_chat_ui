@@ -2,16 +2,13 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 from enum import Enum
 import logic.user_state as state
-from ui.chat_session import show_chat
+from ui.chat_session import show_chat_session
 from ui.new_chat import start_new_chat
 from ui.settings import manage_models
 from ui.ui_helpers import right_align_2nd_col, sidebar_about_link
 
 
 def show_home(show_logout: callable) -> None:
-    # Right align token counter
-    right_align_2nd_col()
-
     class NavMenuOptions(Enum):
         NEW = 'New'
         SETTINGS = 'Settings'
@@ -103,7 +100,10 @@ def show_home(show_logout: callable) -> None:
 
     # Chat session/Dialog
     else:
-        show_chat(session, get_model())
+        show_chat_session(session, get_model())
+
+    # Right align token counter
+    right_align_2nd_col()
 
 
 def apply_to_st_session(state_updates):

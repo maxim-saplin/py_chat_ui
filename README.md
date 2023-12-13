@@ -91,3 +91,6 @@ docker run -p 8501:8501 py-chat-ui
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/8d242ffd-88b1-4d63-88d8-6e5a214cfbe9)
 
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/5e00aa12-a8ee-45e1-8493-e5a113a06e8c)
+
+## Changelog
+- 0.1.3 - lazy loading of chat sessions from files, refactored chat session UI, UI tweaks (more space to chate session), openai and stramlit packages updated

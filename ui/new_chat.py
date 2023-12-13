@@ -37,4 +37,3 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
         state_update['prompt'] = prompt
 
     return state_update
-    
