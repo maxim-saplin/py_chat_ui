@@ -1,14 +1,15 @@
 import streamlit as st
 from streamlit.components.v1 import html
 
-# def button_hover_color():
-#     st.markdown("""
-#     <style>
-#         button:hover {
-#             color: #FF0000;
-#         }
-#     </style>
-#     """, unsafe_allow_html=True)
+
+def global_ui_tweaks():
+    st.markdown("""
+    <style>
+        header[data-testid="stHeader"] {
+            visibility: hidden;
+        }
+    </style>
+    """, unsafe_allow_html=True)
 
 
 def register_button_as_link():
@@ -24,13 +25,15 @@ def register_button_as_link():
     """, unsafe_allow_html=True)
 
 
-def sidebar_link():
+def sidebar_about_link():
     st.markdown("""
     <style>
         div[data-testid="stSidebarUserContent"] div.element-container:last-child  {
             position: fixed;
-            bottom: 10px;
+            bottom: 30px;
             opacity: 0.5;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
     </style>
     """, unsafe_allow_html=True)
@@ -65,8 +68,8 @@ def right_align_2nd_col():
             text-align: end;
             position: fixed;
             z-index: 999;
-            top: 40px;
-            right: 50px;
+            top: 20px;
+            right: 40px;
             color: yellow;
             text-shadow: 1.5px 1px 0px black;
             font-weight: 900;
@@ -143,6 +146,16 @@ def hide_tokinzer_workaround_form():
         }
     </style>
 """, unsafe_allow_html=True)
+
+
+def chat_bottom_padding():
+    st.markdown("""
+        <style>
+            div.stChatFloatingInputContainer {
+                padding-bottom: 30px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
 
 def embed_chat_input_handler_js():

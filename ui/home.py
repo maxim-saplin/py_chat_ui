@@ -5,7 +5,7 @@ import logic.user_state as state
 from ui.chat_session import show_chat
 from ui.new_chat import start_new_chat
 from ui.settings import manage_models
-from ui.ui_helpers import right_align_2nd_col, sidebar_link
+from ui.ui_helpers import right_align_2nd_col, sidebar_about_link
 
 
 def show_home(show_logout: callable) -> None:
@@ -73,7 +73,7 @@ def show_home(show_logout: callable) -> None:
             st.session_state['chat_session_id'] = session_id
             session = state.session_manager.get_session_by_id(st.session_state['chat_session_id'])
 
-        sidebar_link()
+        sidebar_about_link()
         st.markdown('[[?]](https://github.com/maxim-saplin/py_chat_ui/tree/main) · '+st.session_state['version']+' · ツ')
 
     # Settings

@@ -1,7 +1,7 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import embed_chat_input_handler_js, hide_tokinzer_workaround_form
+from ui.ui_helpers import chat_bottom_padding, embed_chat_input_handler_js, hide_tokinzer_workaround_form
 
 
 def get_ai_reply(client: util.OpenAI, model: state.Model, session: state.ChatSession, prompt: str | None) -> str:
@@ -36,6 +36,8 @@ def show_chat(session: state.ChatSession, model: state.Model):
         st.session_state['prompt_for_tokenizer'] = None
 
     hide_tokinzer_workaround_form()
+    chat_bottom_padding()
+
     with st.form("hidden"):
         txt = st.text_input("hidden prompt for tokenizer")
         submitted = st.form_submit_button("Submit")

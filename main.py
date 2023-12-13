@@ -4,7 +4,7 @@ import streamlit as st
 from logic.user_state import init
 from ui.login import authenticate, show_logout, get_user_name, get_enc_key
 from ui.home import show_home
-from ui.ui_helpers import hide_streamlit_menu, hide_streamlit_toolbar
+from ui.ui_helpers import global_ui_tweaks, hide_streamlit_menu, hide_streamlit_toolbar
 
 import time
 start_time = time.time()
@@ -19,6 +19,7 @@ st.session_state['version'] = __version__
 
 hide_streamlit_menu()
 hide_streamlit_toolbar()
+global_ui_tweaks()
 
 if auth := authenticate():
     user = get_user_name()
