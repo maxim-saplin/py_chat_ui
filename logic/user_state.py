@@ -118,7 +118,6 @@ class ModelRepository:
     def __init__(self):
         self.models: list[Model] = []
         self.last_used_model: str = ""
-        self.last_used_deployment: str = ""
 
     def load(self) -> None:
         try:
@@ -127,11 +126,9 @@ class ModelRepository:
                 if len(encrypted_data) == 0:
                     self.models = []
                     self.last_used_model = ""
-                    self.last_used_deployment = ""
                 else:
-                    self.models,
-                    self.last_used_model,
-                    self.last_used_deployment = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                    self.models, \
+                        self.last_used_model = pickle.loads(decrypt_data(encrypted_data, encryption_key))
         except FileNotFoundError:
             pass
         except InvalidToken:
@@ -183,7 +180,6 @@ class ModelRepository:
         self.models = [model for model in self.models if model.alias != model_alias]
         if self.last_used_model == model_alias:
             self.last_used_model = ""
-            self.last_used_deployment = ""
         self.save()
 
     def update(self, alias: str, model: Model) -> None:
@@ -203,7 +199,7 @@ class ModelRepository:
         os.makedirs(os.path.join(env_data_folder, user_dir), exist_ok=True)
         with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
             encrypted_data = encrypt_data(
-                pickle.dumps((self.models, self.last_used_model, self.last_used_deployment)),
+                pickle.dumps((self.models, self.last_used_model)),
                 encryption_key)
             f.write(encrypted_data)
 
@@ -308,24 +304,6 @@ class ChatSession:
                 chat_session.start_date = data['start_date']
                 chat_session.file_path = file_path
                 chat_session.messages_file_path = f"{os.path.splitext(file_path)[0]}_messages.pkl"
-                # if os.path.exists(messages_file_path):
-                #     with open(messages_file_path, 'rb') as mf:
-                #         while True:
-                #             try:
-                #                 # Read the length of the encrypted message
-                #                 length_bytes = mf.read(4)
-                #                 if not length_bytes:
-                #                     break  # No more messages
-                #                 length = int.from_bytes(length_bytes, 'big')
-                #                 # Now read the exact length of the message
-                #                 encrypted_message_data = mf.read(length)
-                #                 _, message = pickle.loads(decrypt_data(encrypted_message_data, encryption_key))
-                #                 chat_session.messages.append(message)
-                #             except EOFError:
-                #                 break
-                #             except Exception as e:
-                #                 raise e
-                # chat_session.messages_file_path = messages_file_path
                 return chat_session
         except InvalidToken:
             raise ValueError(
