@@ -5,7 +5,7 @@ import logic.user_state as state
 from ui.chat_session import show_chat_session
 from ui.new_chat import start_new_chat
 from ui.settings import manage_models
-from ui.ui_helpers import right_align_2nd_col, sidebar_about_link
+from ui.ui_helpers import sidebar_about_link
 
 
 def show_home(show_logout: callable) -> None:
@@ -101,9 +101,6 @@ def show_home(show_logout: callable) -> None:
     # Chat session/Dialog
     else:
         show_chat_session(session, get_model())
-
-    # Right align token counter
-    right_align_2nd_col()
 
 
 def apply_to_st_session(state_updates):

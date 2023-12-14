@@ -1,8 +1,9 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import (chat_bottom_padding, show_generate_button_js, embed_chat_input_js,
-                           hide_tokinzer_workaround_form, show_generate_chat_input_js, stop_generation_button_styles)
+from ui.ui_helpers import (chat_bottom_padding, right_align_2nd_col_tokenizer, show_generate_button_js,
+                           embed_chat_input_js, hide_tokinzer_workaround_form,
+                           show_generate_chat_input_js, stop_generation_button_styles)
 
 
 def show_chat_session(chat_session: state.ChatSession, model: state.Model):
@@ -16,6 +17,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     hide_tokinzer_workaround_form()
     chat_bottom_padding()
     stop_generation_button_styles()
+    right_align_2nd_col_tokenizer()
 
     # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
@@ -77,7 +79,6 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 # Yet it srrms the st.chat_input() does way more behind the scenese, when OpenAI ran streaming response
                 # thre were some silen failures under the hood of streamlit and not chat generation worked, reliably
                 # Deffering to js tricks and toggling control's visibility
-                show_generate_chat_input_js()
                 if prompt := st.chat_input('What is up?', disabled=st.session_state['generating']):
                     st.session_state['prompt_for_tokenizer'] = None
                     st.session_state['generating'] = True
@@ -98,6 +99,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         st.text(e)
 
     embed_chat_input_js()
+    show_generate_chat_input_js()
 
 
 def get_and_display_ai_reply(client: util.OpenAI, model: state.Model,

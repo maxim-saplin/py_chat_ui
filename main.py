@@ -8,7 +8,7 @@ from ui.ui_helpers import global_ui_tweaks, hide_streamlit_menu, hide_streamlit_
 import time
 
 
-print('Py Chat, Request received')
+# print('Py Chat, Request received')
 start_time = time.time()
 
 st.set_page_config(

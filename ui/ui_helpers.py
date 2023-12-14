@@ -60,7 +60,7 @@ def login_background():
     """, unsafe_allow_html=True)
 
 
-def right_align_2nd_col():
+def right_align_2nd_col_tokenizer():
     st.markdown("""
     <style>
         div[data-testid="column"]:nth-of-type(2) p {
@@ -191,6 +191,7 @@ def show_generate_button_js():
 
     js = """
 <script>
+console.log("show_generate_button_js");
 const stopButton = window.parent.document.querySelector(
     'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
 stopButton.style.visibility = 'visible';
@@ -204,6 +205,7 @@ chatInputContainer.style.visibility = 'hidden';
 def show_generate_chat_input_js():
     js = """
 <script>
+console.log("show_generate_chat_input_js");
 const stopButton = window.parent.document.querySelector(
     'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
 stopButton.style.visibility = 'hidden';
@@ -217,7 +219,7 @@ chatInputContainer.style.visibility = 'visible';
 def embed_chat_input_js():
     js = """
 <script>
-console.log("Chat input handler is activating...");
+//console.log("Chat input handler is activating...");
 
 let previousValue = '';
 const originalTextArea = window.parent.document.querySelector('.stChatInputContainer textarea');
