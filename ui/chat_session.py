@@ -2,7 +2,7 @@ import streamlit as st
 import logic.user_state as state
 import logic.utility as util
 from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_elements, right_align_2nd_col_tokenizer,
-                           show_generate_button_js, set_chat_input_text,
+                           show_cancel_generate_button_js, set_chat_input_text,
                            embed_chat_input_js, hide_tokinzer_workaround_form,
                            show_generate_chat_input_js, stop_generation_button_styles)
 
@@ -75,6 +75,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         if not st.session_state['generating']:
             # User prompt came in from New Chat
             if chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+                show_cancel_generate_button_js()
                 with st.chat_message('assistant', avatar='ui/ai.png'):
                     st.session_state['generating'] = True
                     st.session_state['get_and_display_ai_reply_BREAK'] = False
@@ -90,7 +91,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                     st.session_state['prompt_for_tokenizer'] = None
                     st.session_state['generating'] = True
                     chat_session.add_message({'role': 'user', 'content': prompt})
-                    show_generate_button_js()
+                    show_cancel_generate_button_js()
                     with st.chat_message('assistant', avatar='ui/user.png'):
                         st.markdown(prompt)
                     with st.chat_message('assistant', avatar='ui/ai.png'):
@@ -100,6 +101,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                         st.rerun()
 
             st.session_state['generating'] = False
+
     except Exception as e:
         st.session_state['generating'] = False
         st.error('An error occurred while sending Chat API request')

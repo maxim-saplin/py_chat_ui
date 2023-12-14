@@ -217,7 +217,7 @@ def stop_generation_button_styles():
     """, unsafe_allow_html=True)
 
 
-def show_generate_button_js():
+def show_cancel_generate_button_js():
     """
     And hide chat input
     """

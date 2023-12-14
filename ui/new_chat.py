@@ -10,10 +10,13 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
 
     st.title('New Chat')
     model_options = [model.alias for model in model_repository.models]
-    selected_model_alias = model_repository.get_last_used_model().alias
-    selected_model_alias = st.selectbox('Model', model_options)
+    old_selected_model_alias = model_repository.get_last_used_model().alias
+    selected_model_index = model_options.index(old_selected_model_alias)
+    selected_model_alias = st.selectbox('Model', model_options, index=selected_model_index)
+    if old_selected_model_alias != selected_model_alias:
+        model_repository.set_last_used_model_alias(selected_model_alias)
+        st.rerun()
     model = model_repository.get_model_by_alias(selected_model_alias)
-    model_repository.set_last_used_model_alias(selected_model_alias)
 
     session = None
     system_message = st.text_area('System message', st.session_state['system_message'])
