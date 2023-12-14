@@ -1,7 +1,7 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import (add_generation_marker, chat_bottom_padding, show_generate_button_js, embed_chat_input_js,
+from ui.ui_helpers import (chat_bottom_padding, show_generate_button_js, embed_chat_input_js,
                            hide_tokinzer_workaround_form, show_generate_chat_input_js, stop_generation_button_styles)
 
 
@@ -10,9 +10,6 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         st.session_state['generating'] = False
     if 'prompt_for_tokenizer' not in st.session_state:
         st.session_state['prompt_for_tokenizer'] = None
-    # Exclusive lock, only one call to this function once at a time
-    if 'get_and_display_ai_reply_RUNNING' not in st.session_state:
-        st.session_state['get_and_display_ai_reply_RUNNING'] = False
     if 'get_and_display_ai_reply_BREAK' not in st.session_state:
         st.session_state['get_and_display_ai_reply_BREAK'] = False
 
@@ -20,11 +17,12 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     chat_bottom_padding()
     stop_generation_button_styles()
 
+    # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
-        txt = st.text_input("hidden prompt for tokenizer")
+        txt = st.text_input("hidden prompt for tokenizer").strip()
         submitted = st.form_submit_button("Submit")
-        if submitted and txt:
-            st.session_state['prompt_for_tokenizer'] = txt
+        if submitted and txt != st.session_state['prompt_for_tokenizer']:
+            st.session_state['prompt_for_tokenizer'] = None if txt == '' else txt
             st.rerun()
 
     # Chat header
@@ -61,7 +59,6 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
             if st.button('Cancel generation'):
                 st.session_state['generating'] = False
                 st.session_state['get_and_display_ai_reply_BREAK'] = True
-                st.session_state['get_and_display_ai_reply_RUNNING'] = False
                 # st.session_state[''] = chat_session.messages[-1]['content']
                 chat_session.delete_last_user_message()
                 st.rerun()
@@ -76,6 +73,10 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                     st.session_state['generating'] = False
                     st.rerun()
             else:
+                # Tried doing nicely server-sde (setting sttuds to generating after promnpt, show stop button etc.)
+                # Yet it srrms the st.chat_input() does way more behind the scenese, when OpenAI ran streaming response
+                # thre were some silen failures under the hood of streamlit and not chat generation worked, reliably
+                # Deffering to js tricks and toggling control's visibility
                 show_generate_chat_input_js()
                 if prompt := st.chat_input('What is up?', disabled=st.session_state['generating']):
                     st.session_state['prompt_for_tokenizer'] = None
@@ -101,8 +102,6 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
 def get_and_display_ai_reply(client: util.OpenAI, model: state.Model,
                              chat_session: state.ChatSession) -> None:
-    # assert not st.session_state['get_and_display_ai_reply_RUNNING'], 'get_and_display_ai_reply() is already in progress'
-    st.session_state['get_and_display_ai_reply_RUNNING'] = True
     if st.session_state['get_and_display_ai_reply_BREAK']:
         return
     print('get_and_display_ai_reply')
@@ -135,5 +134,4 @@ def get_and_display_ai_reply(client: util.OpenAI, model: state.Model,
         print('get_and_display_ai_reply - completing')
         return full_response
     finally:
-        st.session_state['get_and_display_ai_reply_RUNNING'] = False
         st.session_state['get_and_display_ai_reply_BREAK'] = False

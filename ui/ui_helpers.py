@@ -168,6 +168,9 @@ def chat_bottom_padding():
 
 
 def stop_generation_button_styles():
+    """
+    And hide generation button
+    """
     st.markdown("""
         <style>
             div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton {
@@ -181,13 +184,11 @@ def stop_generation_button_styles():
     """, unsafe_allow_html=True)
 
 
-def add_generation_marker():
-    st.markdown("""
-        <input type="hidden" id="generationInProgress">
-    """, unsafe_allow_html=True)
-
-
 def show_generate_button_js():
+    """
+    And hide chat input
+    """
+
     js = """
 <script>
 const stopButton = window.parent.document.querySelector(
@@ -234,7 +235,8 @@ originalTextArea.addEventListener('keyup', () => {
         if (originalTextArea.value !== previousValue) {
             console.log("Chat input text changed");
 
-            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+            const nativeInputValueSetter =
+                Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
             nativeInputValueSetter.call(formInput, originalTextArea.value);
             const event = new Event('input', { bubbles: true });
             formInput.dispatchEvent(event);
