@@ -13,6 +13,7 @@ Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key et
 - **Can be deployed as a single container:** no dependencies on Postgress, all data is stored in local files and encrypted
 -   `docker pull ghcr.io/maxim-saplin/py_chat_ui:latest`
 - **Response srtreaming**: see how OpneAI is typing back
+  - Generation cancelation is supported, LLM replies midway and change the prompt
 - **Model Customization**: Users can add, update, and delete AI models with custom settings in UI OR have a mode defined in ENV variables
 - **Single and Multi user**: Anonymous authentication (single user) with not lock screen OR user authentication against a local user DBin a YAML file (pairs of usernames/password hashes).
 - **Chat Persistence**: Dialogs are saved on the server in flies and can be access acros different devices.
@@ -93,4 +94,4 @@ docker run -p 8501:8501 py-chat-ui
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/5e00aa12-a8ee-45e1-8493-e5a113a06e8c)
 
 ## Changelog
-- 0.1.3 - lazy loading of chat sessions from files, refactored chat session UI, UI tweaks (removing empty space), OpenAI and Streamlit packages updated
+- 0.2.0 - lazy loading of chat sessions from files, refactored chat session UI, UI tweaks (removing empty space), OpenAI and Streamlit packages updated
