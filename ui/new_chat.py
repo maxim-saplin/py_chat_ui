@@ -1,9 +1,13 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
+from ui.ui_helpers import new_chat_collapse_markdown_hidden_elements
 
 
 def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessionManager,
                    system_message: str, temperature: float) -> dict:
+    
+    new_chat_collapse_markdown_hidden_elements()
+
     st.title('New Chat')
     model_options = [model.alias for model in model_repository.models]
     selected_model_alias = model_repository.get_last_used_model().alias

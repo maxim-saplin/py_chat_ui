@@ -3,7 +3,7 @@ from streamlit.components.v1 import html
 
 
 def global_ui_tweaks():
-    st.markdown("""
+    st.write("""
     <style>
         header[data-testid="stHeader"] {
             visibility: hidden;
@@ -13,7 +13,7 @@ def global_ui_tweaks():
 
 
 def register_button_as_link():
-    st.markdown("""
+    st.write("""
     <style>
         div.row-widget button[kind="secondary"] {
             text-decoration: underline;
@@ -26,7 +26,7 @@ def register_button_as_link():
 
 
 def sidebar_about_link():
-    st.markdown("""
+    st.write("""
     <style>
         div[data-testid="stSidebarUserContent"] div.element-container:last-child  {
             position: fixed;
@@ -40,7 +40,7 @@ def sidebar_about_link():
 
 
 def login_background():
-    st.markdown("""
+    st.write("""
     <style>
         div.stApp {
             background: repeating-linear-gradient(
@@ -61,7 +61,7 @@ def login_background():
 
 
 def right_align_2nd_col_tokenizer():
-    st.markdown("""
+    st.write("""
     <style>
         div[data-testid="column"]:nth-of-type(2) p {
             font-family: monospace;
@@ -98,7 +98,7 @@ def hide_streamlit_toolbar():
     """
     Running man at the top right corner when a request is executed
     """
-    st.markdown("""
+    st.write("""
     <style>
         div[data-testid="stToolbar"] {
             display: none;
@@ -111,7 +111,7 @@ def add_theme_customizations():
     """
     Adjusting those styles that were not possible to be changed in config.toml
     """
-    st.markdown("""
+    st.write("""
 
     <style>
         div.stChatMessage p{
@@ -125,7 +125,7 @@ def hide_streamlit_menu():
     """
     Deply, Three Dots button, as well as Made with Streamlit at the bottom
     """
-    st.markdown("""
+    st.write("""
     <style>
         .reportview-container {
             margin-top: -2em;
@@ -139,7 +139,7 @@ def hide_streamlit_menu():
 
 
 def hide_tokinzer_workaround_form():
-    st.markdown("""
+    st.write("""
     <style>
         div[data-testid="stForm"] {
             height: 0px;
@@ -157,8 +157,41 @@ def hide_tokinzer_workaround_form():
 """, unsafe_allow_html=True)
 
 
+def new_chat_collapse_markdown_hidden_elements():
+    st.write("""
+        <style>
+            section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
+                margin-top: -80px;
+                margin-bottom: -80px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
+def settings_collapse_markdown_hidden_elements():
+    st.write("""
+        <style>
+            section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
+                margin-top: -80px;
+                margin-bottom: -100px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
+def chat_collapse_markdown_hidden_elements():
+    st.write("""
+        <style>
+            section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
+                margin-top: -100px;
+                margin-bottom: -180px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+
 def chat_bottom_padding():
-    st.markdown("""
+    st.write("""
         <style>
             div.stChatFloatingInputContainer {
                 padding-bottom: 30px;
@@ -171,7 +204,7 @@ def stop_generation_button_styles():
     """
     And hide generation button
     """
-    st.markdown("""
+    st.write("""
         <style>
             div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton {
                 text-align: center;
@@ -208,9 +241,9 @@ def show_generate_chat_input_js():
 console.log("show_generate_chat_input_js");
 const stopButton = window.parent.document.querySelector(
     'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
-stopButton.style.visibility = 'hidden';
+if (stopButton) stopButton.style.visibility = 'hidden';
 const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
-chatInputContainer.style.visibility = 'visible';
+if (chatInputContainer) chatInputContainer.style.visibility = 'visible';
 </script>
     """
     html(js, 0, 0, False)
@@ -242,32 +275,37 @@ const originalButton = window.parent.document.querySelector('.stChatInputContain
 const formInput = window.parent.document.querySelector('div[data-testid="stForm"] input');
 const formButton = window.parent.document.querySelector('div[data-testid="stForm"] button');
 
-originalButton.addEventListener('click', () => {
-  console.log('Button clicked with text:');
-});
+if (originalButton){
+    originalButton.addEventListener('click', () => {
+    console.log('Button clicked with text:');
+    });
 
-originalTextArea.addEventListener('keyup', () => {
-    clearTimeout(window.debounceTimeout);
-    window.debounceTimeout = setTimeout(() => {
-        if (originalTextArea.value !== previousValue) {
-            console.log("Chat input text changed");
+    originalTextArea.addEventListener('keyup', () => {
+        clearTimeout(window.debounceTimeout);
+        window.debounceTimeout = setTimeout(() => {
+            if (originalTextArea.value !== previousValue) {
+                console.log("Chat input text changed");
 
-            const nativeInputValueSetter =
-                Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-            nativeInputValueSetter.call(formInput, originalTextArea.value);
-            const event = new Event('input', { bubbles: true });
-            formInput.dispatchEvent(event);
+                const nativeInputValueSetter =
+                    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
+                nativeInputValueSetter.call(formInput, originalTextArea.value);
+                const event = new Event('input', { bubbles: true });
+                formInput.dispatchEvent(event);
 
-            previousValue = originalTextArea.value;
+                previousValue = originalTextArea.value;
 
-            setTimeout(() => {
-                formButton.click();
-            }, 100);
-        }
-    }, 300);
-});
+                setTimeout(() => {
+                    formButton.click();
+                }, 100);
+            }
+        }, 300);
+    });
+    console.log("Chat input handler is active");
+}
+else {
+    console.log("Chat input not active, chat input not found");
+}
 
-console.log("Chat input handler is active");
 </script>
     """
     html(js, 0, 0, False)

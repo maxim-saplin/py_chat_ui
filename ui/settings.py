@@ -1,5 +1,6 @@
 import streamlit as st
 import logic.user_state as state
+from ui.ui_helpers import settings_collapse_markdown_hidden_elements
 
 
 def manage_models(model_repository: state.ModelRepository) -> dict:
@@ -7,6 +8,9 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
     Returns 'models_changed': True is there're any write ioperations hapenning inside
     (e.g. adding, deleteting, updating) - might want to do upstream refresh
     """
+
+    settings_collapse_markdown_hidden_elements()
+
     ADD_NEW_MODEL_TEXT = '+ Add New Model'
 
     def get_model_options():

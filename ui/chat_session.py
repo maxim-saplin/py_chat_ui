@@ -1,7 +1,7 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import (chat_bottom_padding, right_align_2nd_col_tokenizer, set_chat_input_text,
+from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_elements, right_align_2nd_col_tokenizer, set_chat_input_text,
                            show_generate_button_js,
                            embed_chat_input_js, hide_tokinzer_workaround_form,
                            show_generate_chat_input_js, stop_generation_button_styles)
@@ -19,6 +19,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
     hide_tokinzer_workaround_form()
     chat_bottom_padding()
+    chat_collapse_markdown_hidden_elements()
     stop_generation_button_styles()
     right_align_2nd_col_tokenizer()
 

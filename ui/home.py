@@ -9,6 +9,7 @@ from ui.ui_helpers import sidebar_about_link
 
 
 def show_home(show_logout: callable) -> None:
+
     class NavMenuOptions(Enum):
         NEW = 'New'
         SETTINGS = 'Settings'
