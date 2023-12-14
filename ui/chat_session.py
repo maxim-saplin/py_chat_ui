@@ -1,7 +1,8 @@
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
-from ui.ui_helpers import (chat_bottom_padding, right_align_2nd_col_tokenizer, show_generate_button_js,
+from ui.ui_helpers import (chat_bottom_padding, right_align_2nd_col_tokenizer, set_chat_input_text,
+                           show_generate_button_js,
                            embed_chat_input_js, hide_tokinzer_workaround_form,
                            show_generate_chat_input_js, stop_generation_button_styles)
 
@@ -11,6 +12,8 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         st.session_state['generating'] = False
     if 'prompt_for_tokenizer' not in st.session_state:
         st.session_state['prompt_for_tokenizer'] = None
+    if 'canceled_prompt' not in st.session_state:
+        st.session_state['canceled_prompt'] = None
     if 'get_and_display_ai_reply_BREAK' not in st.session_state:
         st.session_state['get_and_display_ai_reply_BREAK'] = False
 
@@ -61,7 +64,10 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
             if st.button('Cancel generation'):
                 st.session_state['generating'] = False
                 st.session_state['get_and_display_ai_reply_BREAK'] = True
-                # st.session_state[''] = chat_session.messages[-1]['content']
+                try:
+                    st.session_state['canceled_prompt'] = chat_session.messages[-1]['content']
+                except Exception as e:
+                    print(f"Error saving canceled prompt: {e}")
                 chat_session.delete_last_user_message()
                 st.rerun()
 
@@ -85,7 +91,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                     chat_session.add_message({'role': 'user', 'content': prompt})
                     show_generate_button_js()
                     with st.chat_message('assistant', avatar='ui/user.png'):
-                        st.markdown(message['content'])
+                        st.markdown(prompt)
                     with st.chat_message('assistant', avatar='ui/ai.png'):
                         st.session_state['get_and_display_ai_reply_BREAK'] = False
                         get_and_display_ai_reply(util.create_client(model), model, chat_session)
@@ -100,6 +106,10 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
     embed_chat_input_js()
     show_generate_chat_input_js()
+    # Cancelation happened, fill in chat input with past prompt
+    if st.session_state['canceled_prompt'] not in (None, ''):
+        set_chat_input_text(st.session_state['canceled_prompt'])
+        st.session_state['canceled_prompt'] = None
 
 
 def get_and_display_ai_reply(client: util.OpenAI, model: state.Model,

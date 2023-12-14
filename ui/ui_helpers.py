@@ -216,6 +216,21 @@ chatInputContainer.style.visibility = 'visible';
     html(js, 0, 0, False)
 
 
+def set_chat_input_text(promptText: str):
+    escaped_prompt_text = promptText.replace('`', '\\`').replace('\n', '\\n')
+# !!! Since react controls state, simle DOM values setting won't work, goind the hard way of simulating user interaction
+    js = f"""
+<script>
+const chatInput = window.parent.document.querySelector('.stChatInputContainer textarea');
+const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+nativeTextAreaValueSetter.call(chatInput, `{escaped_prompt_text}`);
+const event = new Event('input', {{ bubbles: true }});
+chatInput.dispatchEvent(event);
+</script>
+    """
+    html(js, 0, 0, False)
+
+
 def embed_chat_input_js():
     js = """
 <script>

@@ -25,6 +25,7 @@ cookie:
     with open(users_file) as file:
         config = yaml.load(file, Loader=SafeLoader)
 
+
 def get_auth(config):
     authenticator = stauth.Authenticate(
         config['credentials'],
@@ -34,6 +35,7 @@ def get_auth(config):
         # config['preauthorized']
     )
     return authenticator
+
 
 def authenticate() -> stauth.Authenticate | str | None:
     """
@@ -49,7 +51,7 @@ def authenticate() -> stauth.Authenticate | str | None:
 
     authenticator = get_auth(config)
 
-    #authenticator.login('Login', 'main')
+    # authenticator.login('Login', 'main')
     # Init session vars without showing a login to avoid UI blinking
     if not st.session_state.get("cookie_checked", False):
         authenticator._check_cookie()
@@ -85,13 +87,14 @@ def authenticate() -> stauth.Authenticate | str | None:
                     st.success('User registered successfully')
                     with open(users_file, 'w') as file:
                         yaml.dump(config, file, default_flow_style=False)
-                    #st.session_state['view_mode'] = 'login'
+                    # st.session_state['view_mode'] = 'login'
             except Exception as e:
-                st.error(e)        
+                st.error(e)
 
         # elif st.session_state["authentication_status"] is None:
         #     st.warning('Please enter your username and password')
         return None
+
 
 def get_user_name() -> str | None:
     """
@@ -103,6 +106,7 @@ def get_user_name() -> str | None:
     if env_disable_auth:
         return 'default_user'
     return st.session_state.get("username", None)
+
 
 def get_enc_key() -> bytes | None:
     """
@@ -117,14 +121,9 @@ def get_enc_key() -> bytes | None:
 
 
 def show_logout(authenticator: stauth.Authenticate | str) -> None:
-    assert isinstance(authenticator, (stauth.Authenticate, str)), "Parameter must be an instance of 'stauth.Authenticate' or 'str'"
+    assert isinstance(authenticator, stauth.Authenticate) or \
+           isinstance(authenticator, str), \
+           "Parameter must be an instance of 'stauth.Authenticate' or 'str'"
     if not isinstance(authenticator, stauth.Authenticate):
         return
     authenticator.logout(f'Logout: *{st.session_state["username"]}*', 'main')
-
-
-
-
-
-
-
