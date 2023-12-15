@@ -184,7 +184,7 @@ def chat_collapse_markdown_hidden_elements():
         <style>
             section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
                 margin-top: -100px;
-                margin-bottom: -180px;
+                margin-bottom: -80px;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -196,11 +196,17 @@ def chat_bottom_padding():
             div.stChatFloatingInputContainer {
                 padding-bottom: 30px;
             }
+            section[tabindex="0"] > div > div > div > div[data-testid="stVerticalBlock"] > div[data-testid="element-container"] {
+                height: 0;
+                # display: none;
+                # border: none;
+                # padding: none;
+            }
         </style>
     """, unsafe_allow_html=True)
 
 
-def stop_generation_button_styles():
+def cancel_generation_button_styles():
     """
     And hide generation button
     """
@@ -212,6 +218,7 @@ def stop_generation_button_styles():
                 bottom: 31px;
                 visibility: hidden;
                 z-index: 999;
+                background-color: transparent;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -298,7 +305,7 @@ if (originalButton){
                     formButton.click();
                 }, 100);
             }
-        }, 300);
+        }, 1200);
     });
     console.log("Chat input handler is active");
 }

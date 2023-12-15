@@ -94,6 +94,7 @@ docker run -p 8501:8501 py-chat-ui
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/5e00aa12-a8ee-45e1-8493-e5a113a06e8c)
 
 ## Changelog
+- 0.2.3 - token counter in New Chat, faster token counter in dialog, longer debounce interval for prompt token counter, UI tweaks
 - 0.2.2 - preselecting last model used in New Chat, ability to cancel very request question after New Chat started
 - 0.2.1 - fix for model persistance
 - 0.2.0 - lazy loading of chat sessions from files, refactored chat session UI, UI tweaks (removing empty space), OpenAI and Streamlit packages updated

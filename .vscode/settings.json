@@ -6,5 +6,10 @@
     ],
     "flake8.args": [
         "--max-line-length=120"
-     ]
+    ],
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }

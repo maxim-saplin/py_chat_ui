@@ -4,12 +4,14 @@ import logic.utility as util
 from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_elements, right_align_2nd_col_tokenizer,
                            show_cancel_generate_button_js, set_chat_input_text,
                            embed_chat_input_js, hide_tokinzer_workaround_form,
-                           show_generate_chat_input_js, stop_generation_button_styles)
+                           show_generate_chat_input_js, cancel_generation_button_styles)
 
 
 def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     if 'generating' not in st.session_state:
         st.session_state['generating'] = False
+    if 'token_count' not in st.session_state:
+        st.session_state['token_count'] = None
     if 'prompt_for_tokenizer' not in st.session_state:
         st.session_state['prompt_for_tokenizer'] = None
     if 'canceled_prompt' not in st.session_state:
@@ -20,7 +22,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     hide_tokinzer_workaround_form()
     chat_bottom_padding()
     chat_collapse_markdown_hidden_elements()
-    stop_generation_button_styles()
+    cancel_generation_button_styles()
     right_align_2nd_col_tokenizer()
 
     # Hidden elements to trigger server side counting of token in chat input
@@ -42,16 +44,17 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     with col2:
         if chat_session is not None:
             model_alias = model.alias if model else "No Model"
-            tokens = util.num_tokens_from_messages(chat_session.messages)
+            if st.session_state['token_count'] is None:
+                st.session_state['token_count'] = util.num_tokens_from_messages(chat_session.messages)
             if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
                 prompt_tokens = util.num_tokens_from_messages(
                     [{'role': 'User', 'content': st.session_state['prompt_for_tokenizer']}])
             else:
                 prompt_tokens = 0
             if prompt_tokens > 0:
-                st.write(f"{model_alias} / {tokens} +{prompt_tokens}")
+                st.write(f"{model_alias} / {st.session_state['token_count'] } +{prompt_tokens}")
             else:
-                st.write(f"{model_alias} / {tokens}")
+                st.write(f"{model_alias} / {st.session_state['token_count'] }")
 
     try:
         if chat_session is not None:
@@ -75,6 +78,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         if not st.session_state['generating']:
             # User prompt came in from New Chat
             if chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+                st.session_state['token_count'] = None
                 show_cancel_generate_button_js()
                 with st.chat_message('assistant', avatar='ui/ai.png'):
                     st.session_state['generating'] = True
@@ -88,6 +92,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 # thre were some silen failures under the hood of streamlit and not chat generation worked, reliably
                 # Deffering to js tricks and toggling control's visibility
                 if prompt := st.chat_input('What is up?', disabled=st.session_state['generating']):
+                    st.session_state['token_count'] = None
                     st.session_state['prompt_for_tokenizer'] = None
                     st.session_state['generating'] = True
                     chat_session.add_message({'role': 'user', 'content': prompt})

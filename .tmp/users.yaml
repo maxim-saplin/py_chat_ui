@@ -1,0 +1,7 @@
+
+credentials:
+  usernames:
+cookie:
+  expiry_days: 30
+  key: 856_some_$0-signature_key
+  name: strmlt-pld
