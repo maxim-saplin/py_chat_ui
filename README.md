@@ -95,6 +95,7 @@ docker run -p 8501:8501 py-chat-ui
 
 ## Changelog
 
+- 0.2.4 - allow defining `base_url` for OpenAI models (e.g. custom model deployments), better error messages for chat API exceptions
 - 0.2.3 - token counter in New Chat, faster token counter in dialog, longer debounce interval for prompt token counter, UI tweaks
 - 0.2.2 - preselecting last model used in New Chat, ability to cancel very first request question after New Chat started
 - 0.2.1 - fix for model persistance

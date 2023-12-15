@@ -109,8 +109,9 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
     except Exception as e:
         st.session_state['generating'] = False
-        st.error('An error occurred while sending Chat API request')
-        st.text(e)
+        with st.container():
+            st.write('An error occurred while sending Chat API request')
+            st.write(e)
 
     embed_chat_input_js()
     show_generate_chat_input_js()

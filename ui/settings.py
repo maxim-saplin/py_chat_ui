@@ -57,12 +57,15 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
 
     api_key = st.text_input('API Key',
                             selected_model.api_key if selected_model else '', disabled=is_env_model or is_fake_type)
+
+    api_base = st.text_input('Leave empty to use OpenAI, or set to override `base_url=` (e.g. custom model deployment)'
+                             if is_openai_type else 'API Base (e.g. "https://my_model.openai.azure.com")',
+                             selected_model.api_base if selected_model else '',
+                             disabled=is_env_model or is_fake_type)
+
     api_version = st.text_input('API Version (e.g. "2023-07-01-preview")',
                                 selected_model.api_version if selected_model else '',
                                 disabled=is_env_model or is_openai_type or is_fake_type)
-    api_base = st.text_input('API Base (e.g. "https://my_model.openai.azure.com")',
-                             selected_model.api_base if selected_model else '',
-                             disabled=is_env_model or is_openai_type or is_fake_type)
     temperature = st.slider('Temperature', 0.0, 1.0,
                             selected_model.temperature if selected_model else 0.7, 0.01,
                             disabled=is_env_model or is_fake_type)

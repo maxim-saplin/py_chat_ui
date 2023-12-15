@@ -13,7 +13,8 @@ def create_client(model: Model) -> OpenAI:
     elif model.api_type == ApiTypeOptions.FAKE:
         return FakeOpenAI()
     else:
-        return OpenAI(api_key=model.api_key)
+        base_url = model.api_base if model.api_base else None
+        return OpenAI(api_key=model.api_key, base_url=base_url)
 
 
 encoding = tiktoken.get_encoding("cl100k_base")
