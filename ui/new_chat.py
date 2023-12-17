@@ -18,7 +18,7 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     model_options = [model.alias for model in model_repository.models]
     old_selected_model_alias = model_repository.get_last_used_model().alias
     selected_model_index = model_options.index(old_selected_model_alias)
-    selected_model_alias = st.selectbox('Model', model_options, index=selected_model_index)
+    selected_model_alias = st.selectbox('Model', model_options, key='select_model_dropdown', index=selected_model_index)
     if old_selected_model_alias != selected_model_alias:
         model_repository.set_last_used_model_alias(selected_model_alias)
         st.rerun()

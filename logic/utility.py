@@ -1,16 +1,16 @@
 from openai import OpenAI, AzureOpenAI
 import tiktoken
-from logic.env_vars import ApiTypeOptions
+from logic import env_vars
 from logic.user_state import Model
 
 
 def create_client(model: Model) -> OpenAI:
-    if model.api_type == ApiTypeOptions.AZURE:
+    if model.api_type == env_vars.ApiTypeOptions.AZURE:
         return AzureOpenAI(api_key=model.api_key,
                            azure_endpoint=model.api_base,
                            api_version=model.api_version,
                            azure_deployment=model.model_or_deployment_name)
-    elif model.api_type == ApiTypeOptions.FAKE:
+    elif model.api_type == env_vars.ApiTypeOptions.FAKE:
         return FakeOpenAI()
     else:
         base_url = model.api_base if model.api_base else None

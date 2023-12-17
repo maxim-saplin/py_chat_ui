@@ -3,14 +3,14 @@ import streamlit_authenticator_2 as stauth
 import os
 import yaml
 from yaml.loader import SafeLoader
-from logic.env_vars import env_data_folder, env_disable_auth, env_disable_user_registration
+from logic import env_vars
 from logic.crypto import generate_fernet_key
 from ui.ui_helpers import login_background, register_button_as_link
 
-users_file: str = os.path.join(env_data_folder, 'users.yaml')
+users_file: str = os.path.join(env_vars.env_data_folder, 'users.yaml')
 
 # Load the configuration file with the user credentials
-if not env_disable_auth:
+if not env_vars.env_disable_auth:
     if not os.path.exists(users_file):
         os.makedirs(os.path.dirname(users_file), exist_ok=True)
         with open(users_file, 'w') as file:
@@ -46,7 +46,7 @@ def authenticate() -> stauth.Authenticate | str | None:
         bool: None if auth is not present, True if the user is authenticated, "disabled" if authentication is diabled
     """
 
-    if env_disable_auth:
+    if env_vars.env_disable_auth:
         return 'dsaibled'
 
     authenticator = get_auth(config)
@@ -70,7 +70,7 @@ def authenticate() -> stauth.Authenticate | str | None:
         login_background()
 
         if st.session_state['view_mode'] == 'login':
-            if not env_disable_user_registration and st.button('Register a new user'):
+            if not env_vars.env_disable_user_registration and st.button('Register a new user'):
                 st.session_state['view_mode'] = 'register'
                 st.rerun()
             # Call generate_fernet_key insternally, pass user name and passwrod and keep the key in server cookies
@@ -103,7 +103,7 @@ def get_user_name() -> str | None:
     Returns:
         Optional[str]: The name of the user if authenticated, otherwise None.
     """
-    if env_disable_auth:
+    if env_vars.env_disable_auth:
         return 'default_user'
     return st.session_state.get("username", None)
 
@@ -115,7 +115,7 @@ def get_enc_key() -> bytes | None:
     Returns:
         Optional[bytes]: The extra payload if present, otherwise None.
     """
-    if env_disable_auth:
+    if env_vars.env_disable_auth:
         return generate_fernet_key('default', 'default')
     return st.session_state.get("auth_extra_payload", None)
 

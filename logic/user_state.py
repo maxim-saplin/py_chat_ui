@@ -4,9 +4,7 @@ import pickle
 import glob
 from cryptography.fernet import InvalidToken
 from logic.crypto import decrypt_data, encrypt_data
-from logic.env_vars import ApiTypeOptions
-from logic.env_vars import (CHATS_FOLDER, MODELS_FILE_NAME, env_data_folder, env_model_alias,
-                            env_model_name, env_api_key, env_api_type, env_api_version, env_api_base, env_temperature)
+from logic import env_vars
 
 # Current users home holder to store all data, must be set
 user_dir: str = None
@@ -19,7 +17,7 @@ class Model:
                  alias: str,
                  deployment_name: str,
                  api_key: str,
-                 api_type: ApiTypeOptions,
+                 api_type: env_vars.ApiTypeOptions,
                  api_version: str,
                  api_base: str,
                  temperature: float,
@@ -69,7 +67,7 @@ class Model:
 
     @api_type.setter
     def api_type(self, value):
-        if not isinstance(value, ApiTypeOptions):
+        if not isinstance(value, env_vars.ApiTypeOptions):
             raise TypeError("Expected api_type to be an instance of ApiTypeOptions")
         self._api_type = value
 
@@ -121,7 +119,7 @@ class ModelRepository:
 
     def load(self) -> None:
         try:
-            with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'rb') as f:
+            with open(os.path.join(env_vars.env_data_folder, user_dir, env_vars.MODELS_FILE_NAME), 'rb') as f:
                 encrypted_data = f.read()
                 if len(encrypted_data) == 0:
                     self.models = []
@@ -196,8 +194,8 @@ class ModelRepository:
         return [model.alias for model in self.models]
 
     def save(self) -> None:
-        os.makedirs(os.path.join(env_data_folder, user_dir), exist_ok=True)
-        with open(os.path.join(env_data_folder, user_dir, MODELS_FILE_NAME), 'wb') as f:
+        os.makedirs(os.path.join(env_vars.env_data_folder, user_dir), exist_ok=True)
+        with open(os.path.join(env_vars.env_data_folder, user_dir, env_vars.MODELS_FILE_NAME), 'wb') as f:
             encrypted_data = encrypt_data(
                 pickle.dumps((self.models, self.last_used_model)),
                 encryption_key)
@@ -212,7 +210,7 @@ class ChatSession:
         self.title: str = title
         self.start_date: datetime.datetime = datetime.datetime.now()
         self._messages: list[dict] = None
-        base_file_path = os.path.join(env_data_folder, user_dir, CHATS_FOLDER,
+        base_file_path = os.path.join(env_vars.env_data_folder, user_dir, env_vars.CHATS_FOLDER,
                                       f"{self.start_date.strftime('%Y%m%d%H%M%S%f')}_{self.session_id}")
         self.file_path: str = f"{base_file_path}.pkl"
         self.messages_file_path: str = f"{base_file_path}_messages.pkl"
@@ -332,7 +330,7 @@ class ChatSessionManager:
         return None
 
     def load_sessions(self) -> None:
-        chat_files = glob.glob(os.path.join(env_data_folder, user_dir, CHATS_FOLDER, "*.pkl"))
+        chat_files = glob.glob(os.path.join(env_vars.env_data_folder, user_dir, env_vars.CHATS_FOLDER, "*.pkl"))
         for file_path in chat_files:
             if not file_path.endswith("_messages.pkl"):
                 try:
@@ -374,7 +372,8 @@ def init(username: str, enc_key) -> None:
     encryption_key = enc_key
     model_repository = ModelRepository()
     model_repository.load()
-    if env_model_alias:
-        model_repository.add_env(env_model_alias, env_model_name, env_api_key,
-                                 env_api_type, env_api_version, env_api_base, env_temperature)
+    if env_vars.env_model_alias:
+        model_repository.add_env(env_vars.env_model_alias, env_vars.env_model_name, env_vars.env_api_key,
+                                 env_vars.env_api_type, env_vars.env_api_version,
+                                 env_vars.env_api_base, env_vars.env_temperature)
     session_manager = ChatSessionManager()
