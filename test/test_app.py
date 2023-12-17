@@ -38,6 +38,16 @@ def test_fake_model_on_startup():
     assert select.value == 'Fake auto-reply model (demonstration)'
 
 
+def test_env_vars_override(monkeypatch):
+    env_vars.override_value(env_data_folder='/override_dir')
+    assert env_vars.env_data_folder == '/override_dir', "Override did not set the correct env var value"
+
+
+def test_env_vars_reset_to_default(monkeypatch):
+    env_vars.reset_env_to_default()
+    assert env_vars.env_data_folder == '.data', "Reset did not revert to the correct default env var value"
+
+
 def print_debug(app_test):
     for attr_name in dir(app_test):
         # Avoid private attributes and methods
