@@ -30,7 +30,7 @@ if auth := authenticate():
             show_home(lambda: show_logout(auth))
         except Exception as e:
             st.error(f'Error in the main loop: {e}')
-            show_logout(auth)
-            raise e
+            show_logout(auth, key='main_logout')
+            # raise e
 
 print(f'Py Chat, Request done in {(time.time() - start_time) * 1000:.2f} ms')

@@ -1,9 +1,11 @@
 from streamlit.testing.v1 import AppTest
 from streamlit.testing.v1.element_tree import ElementList, WidgetList
 import pytest
+# from unittest.mock import patch
 import os
 import shutil
 from logic import env_vars
+
 
 tmp_dir = '.tmp'
 
@@ -30,12 +32,30 @@ def test_for_smoke():
 def test_fake_model_on_startup():
     env_vars.reset_env_to_default(env_data_folder=tmp_dir)
     env_vars.print_debug()
-    app_test = AppTest.from_file("main.py", default_timeout=300)
+    app_test = AppTest.from_file("main.py")
     app_test.run()
     print_debug(app_test)
     assert not app_test.exception
     select = app_test.selectbox('select_model_dropdown')
     assert select.value == 'Fake auto-reply model (demonstration)'
+
+
+# @patch('ui.login.authenticate')
+def test_login_screen_when_auth_enabled():
+    # mock_authenticate.return_value = None  # Simulate unauthenticated user
+    env_vars.reset_env_to_default(env_data_folder=tmp_dir, env_disable_auth=False,
+                                  env_api_type=env_vars.ApiTypeOptions.EMPTY)
+    env_vars.print_debug()
+    app_test = AppTest.from_file("main.py")
+    app_test.session_state["cookie_checked"] = True
+    app_test.run()
+    # print_debug(app_test)
+    assert not app_test.exception
+    # Check for the presence of login elements, e.g., username and password input fields
+    username_input = str(app_test.text_input[0])
+    password_input = str(app_test.text_input[1])
+    assert username_input == "TextInput(_value=InitialValue(), label='Username', form_id='Login')"
+    assert password_input == "TextInput(_value=InitialValue(), label='Password', autocomplete='new-password', form_id='Login')"
 
 
 def test_env_vars_override(monkeypatch):

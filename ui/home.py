@@ -20,6 +20,7 @@ def show_home(show_logout: callable) -> None:
         'prompt': '',
         'chat_session_id': None,
         'selected_menu': None,
+        'show_chat_session': False
     }
     for key, default_value in session_state_defaults.items():
         if key not in st.session_state:
@@ -61,7 +62,7 @@ def show_home(show_logout: callable) -> None:
                 "nav": {"font-family": "monospace;"},
             },
             icons=[''] * len(session_names) + ['gear'] + ['plus']*model_available, menu_icon='cast',
-            default_index=0 if session_names else 1 if model_available else 0)
+            default_index=0 if st.session_state['show_chat_session'] else len(menu_options)-1)
         if st.session_state['selected_menu'] in [NavMenuOptions.NEW.value, NavMenuOptions.SETTINGS.value]:
             st.session_state['chat_session_id'] = None
             session = None

@@ -47,6 +47,7 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             model_repository.update(model.alias, model)
             st.session_state['new_chat_prompt'] = None
             st.session_state['new_chat_token_count'] = None
+            st.session_state['show_chat_session'] = True
 
     # Return the updated state
     state_update = {

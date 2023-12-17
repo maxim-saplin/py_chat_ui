@@ -47,7 +47,7 @@ def authenticate() -> stauth.Authenticate | str | None:
     """
 
     if env_vars.env_disable_auth:
-        return 'dsaibled'
+        return 'disabled'
 
     authenticator = get_auth(config)
 
@@ -120,10 +120,10 @@ def get_enc_key() -> bytes | None:
     return st.session_state.get("auth_extra_payload", None)
 
 
-def show_logout(authenticator: stauth.Authenticate | str) -> None:
+def show_logout(authenticator: stauth.Authenticate | str, key: str | None = None) -> None:
     assert isinstance(authenticator, stauth.Authenticate) or \
            isinstance(authenticator, str), \
            "Parameter must be an instance of 'stauth.Authenticate' or 'str'"
     if not isinstance(authenticator, stauth.Authenticate):
         return
-    authenticator.logout(f'Logout: *{st.session_state["username"]}*', 'main')
+    authenticator.logout(f'Logout: *{st.session_state["username"]}*', 'main', key=key)

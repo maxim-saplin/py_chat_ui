@@ -1,5 +1,6 @@
 import streamlit as st
 import logic.user_state as state
+from logic import env_vars
 from ui.ui_helpers import settings_collapse_markdown_hidden_elements
 
 
@@ -33,22 +34,22 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
     is_env_model = selected_model.is_env if selected_model else False
 
     is_new_model = selected_model_alias == ADD_NEW_MODEL_TEXT
-    is_fake_type = selected_model.api_type == state.ApiTypeOptions.FAKE if selected_model else False
+    is_fake_type = selected_model.api_type == env_vars.ApiTypeOptions.FAKE if selected_model else False
     st.subheader('Fake Model Settings' if is_fake_type else ADD_NEW_MODEL_TEXT if is_new_model
                  else 'Environment Model Parameters' if is_env_model else 'Custom Model Settings')
 
-    api_type_options = [state.ApiTypeOptions.AZURE, state.ApiTypeOptions.OPENAI]
+    api_type_options = [env_vars.ApiTypeOptions.AZURE, env_vars.ApiTypeOptions.OPENAI]
     api_type_index = api_type_options.index(
         selected_model.api_type) if selected_model and selected_model.api_type in api_type_options else 0
     api_type = st.selectbox('API Type', [option.value for option in api_type_options],
                             index=api_type_index, disabled=is_env_model or is_fake_type)
-    api_type = state.ApiTypeOptions.from_string(api_type)
+    api_type = env_vars.ApiTypeOptions.from_string(api_type)
 
     selected_model_alias = st.text_input(
         'Model Alias (Display Name)', value=selected_model_alias if not is_new_model
         else '', disabled=is_env_model or is_fake_type)
 
-    is_openai_type = api_type == state.ApiTypeOptions.OPENAI
+    is_openai_type = api_type == env_vars.ApiTypeOptions.OPENAI
 
     model_or_deployment_name = st.text_input(
         'Model Name (e.g. "gpt-3.5-turbo-0613")',
