@@ -88,12 +88,17 @@ docker build -t py-chat-ui .
 docker run -p 8501:8501 py-chat-ui
 ```
 
-### Qucikly spinup UI for a self-hosted LLM
+## Qucikly spinup UI for a self-hosted LLM
+
+You can get the public image of the UI, adjust environment varaibles to have the correct base URL (and model name and API key) and get
+the UI up-and-running and pointing to the self-deployed model 
 
 ```
-docker build -t py-chat-ui .
-docker run -p 8501:8501 -e DISABLE_AUTH=True -e API_TYPE=OpenAI -e OPENAI_API_BASE=https://mixtral-api.test.com/v1 -e MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1 -e OPENAI_API_KEY=EMPTY py-chat-ui
+docker pull ghcr.io/maxim-saplin/py_chat_ui:latest
+docker run -p 8501:8501 -e DISABLE_AUTH=True -e API_TYPE=OpenAI -e OPENAI_API_BASE=https://mixtral-api.test.com/v1 -e MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1 -e OPENAI_API_KEY=EMPTY ghcr.io/maxim-saplin/py_chat_ui:latest
 ```
+
+Open `localhost:8501` in browser when the container is started.
 
 ## Screenshots
 
