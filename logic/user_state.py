@@ -15,15 +15,15 @@ encryption_key: bytes = None
 class Model:
     def __init__(self,
                  alias: str,
-                 deployment_name: str,
+                 model_or_deployment_name: str,
                  api_key: str,
                  api_type: env_vars.ApiTypeOptions,
-                 api_version: str,
-                 api_base: str,
+                 api_version: str | None,
+                 api_base: str | None,
                  temperature: float,
                  is_env: bool = False):
         self.alias = alias
-        self.model_or_deployment_name = deployment_name
+        self.model_or_deployment_name = model_or_deployment_name
         self.api_key = api_key
         self.api_type = api_type
         self.api_version = api_version
@@ -77,8 +77,8 @@ class Model:
 
     @api_version.setter
     def api_version(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Expected api_version to be a string")
+        if not isinstance(value, (str, type(None))):
+            raise TypeError("Expected api_version to be a string or None")
         self._api_version = value
 
     @property
@@ -87,8 +87,8 @@ class Model:
 
     @api_base.setter
     def api_base(self, value):
-        if not isinstance(value, str):
-            raise TypeError("Expected api_base to be a string")
+        if not isinstance(value, (str, type(None))):
+            raise TypeError("Expected api_base to be a string or None")
         self._api_base = value
 
     @property

@@ -6,8 +6,8 @@ Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key et
 
 ## Features
 
-- **Minimal, responsivee UI**: supports PWA, can be added to home-screen on mobile and work as full-screen app
 - **Token counter**: get number of tokens in the dialog and in the prompt being typed
+- **Minimal, responsivee UI**: supports PWA, can be added to home-screen on mobile
   - Can be seen at the top right corner, counts dialog length + the number of tokens in the promnpt being typed
 - **Azure and OpenAI**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
  - Use it as chat UI for local models that support OpenAI chat API, you can define `base_url` when adding OpenAI models
@@ -32,11 +32,11 @@ You can configure the app either via setting environment variables or puttin val
 |----------------------|-------------|---------------|
 | `OPENAI_API_KEY`     | The API key for OpenAI or Azure | None |
 | `API_TYPE`           | The type of API to use (OpenAI, Azure, Fake, Empty) | Fake |
-| `API_VERSION`        | The version of the API | None |
-| `OPENAI_API_BASE`    | The base URL for the OpenAI API | None |
-| `ALIAS`              | The alias for the model | None |
-| `MODEL`              | The name of the model | None |
-| `TEMPERATURE`        | The temperature setting for the AI model | 0.0 |
+| `API_VERSION`        | The version of the API | Fake |
+| `OPENAI_API_BASE`    | The base URL for the OpenAI client (e.g. Azure deployment URL or custom model URL) | Fake |
+| `ALIAS`              | The alias for the model | Fake auto-reply model (demonstration) |
+| `MODEL`              | The name of the model | Fake |
+| `TEMPERATURE`        | The temperature setting for the AI model | 0.7 |
 | `DATA_DIR`           | The directory where data will be stored | ".data" |
 | `DISABLE_AUTH`       | Whether to disable user authentication | "False" |
 | `DISBLE_USER_REG`     | Whether to disable user registration | "False" |
@@ -50,6 +50,12 @@ You can configure the app either via setting environment variables or puttin val
 ## Local User DB
 
 `users.yaml` stored under `$DATA_DIR` keeps usernames and hashes that are used to authenticate and allow users in. Make changes to this file in the prod to make adjustments to who and how can access the app.
+
+### User registration via UI
+
+When `$DISBLE_USER_REG` is set to `True` the Login page will have `Register a new user` link available. Clicking the link will open a sign-up screen where everyone will be able to enter usernamae and password and create a new user record at `users.yaml` allowing to make the login with the provided creds. Password is hashed, local data encryption key is created from login/password pair and is stored in HTTP-only cookie. No password reset is possible, lost pasword - lost access and data.
+
+### Manually managing user
 
 1. Generate Credentials:
 - Run generate_pass.py.
@@ -82,6 +88,13 @@ docker build -t py-chat-ui .
 docker run -p 8501:8501 py-chat-ui
 ```
 
+### Qucikly spinup UI for a self-hosted LLM
+
+```
+docker build -t py-chat-ui .
+docker run -p 8501:8501 -e DISABLE_AUTH=True -e API_TYPE=OpenAI -e OPENAI_API_BASE=https://mixtral-api.test.com/v1 -e MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1 -e OPENAI_API_KEY=EMPTY py-chat-ui
+```
+
 ## Screenshots
 
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/4f318108-3fa6-4e3d-b416-d1bf1535c58c)
@@ -96,6 +109,7 @@ docker run -p 8501:8501 py-chat-ui
 
 ## Changelog
 
+- 0.2.5 - better handling of empty env vars, building/publishing container images for AMD64 and ARM64 architectures
 - 0.2.4 - allow defining `base_url` for OpenAI models (e.g. custom model deployments), better error messages for chat API exceptions, New Chat as default starup screen
 - 0.2.3 - token counter in New Chat, faster token counter in dialog, longer debounce interval for prompt token counter, UI tweaks
 - 0.2.2 - preselecting last model used in New Chat, ability to cancel very first request question after New Chat started
