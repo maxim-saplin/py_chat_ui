@@ -20,7 +20,8 @@ def setup_test_environment():
     yield  # This allows the test to run
 
     # Teardown code: executed after the test ends
-    shutil.rmtree(env_vars.env_data_folder)
+    if os.path.exists(env_vars.env_data_folder):
+        shutil.rmtree(env_vars.env_data_folder)
 
 
 def test_for_smoke():

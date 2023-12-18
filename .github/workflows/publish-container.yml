@@ -19,6 +19,11 @@ jobs:
         with:
           python-version: '3.x'
 
+      - name: Run tests
+        run: |
+          export PYTHONPATH=$PYTHONPATH:.
+          pytest test
+
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v1
         with:
