@@ -141,17 +141,17 @@ class ModelRepository:
                 env_api_version: str,
                 env_api_base: str,
                 env_temperature: float) -> None:
-        if not any(model.alias == env_model_alias for model in self.models):
-            model = Model(env_model_alias,
-                          env_deployment_name,
-                          env_api_key,
-                          env_api_type,
-                          env_api_version,
-                          env_api_base,
-                          env_temperature,
-                          True)
-            self.models.append(model)
-            self.save()
+        model = Model(env_model_alias,
+                      env_deployment_name,
+                      env_api_key,
+                      env_api_type,
+                      env_api_version,
+                      env_api_base,
+                      env_temperature,
+                      True)
+        self.models = [m for m in self.models if not m.is_env]
+
+        self.models.insert(0, model)
 
     def add(self, model: Model) -> None:
         self.models.append(model)

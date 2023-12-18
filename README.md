@@ -114,6 +114,7 @@ Open `localhost:8501` in browser when the container is started.
 
 ## Changelog
 
+- 0.2.6 - env var model no longer saved to models file
 - 0.2.5 - better handling of empty env vars, building/publishing container images for AMD64 and ARM64 architectures
 - 0.2.4 - allow defining `base_url` for OpenAI models (e.g. custom model deployments), better error messages for chat API exceptions, New Chat as default starup screen
 - 0.2.3 - token counter in New Chat, faster token counter in dialog, longer debounce interval for prompt token counter, UI tweaks
