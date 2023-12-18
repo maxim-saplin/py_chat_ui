@@ -7,14 +7,22 @@ from logic import env_vars
 from logic.crypto import generate_fernet_key
 from ui.ui_helpers import login_background, register_button_as_link
 
-users_file: str = os.path.join(env_vars.env_data_folder, 'users.yaml')
+_config = None
 
-# Load the configuration file with the user credentials
-if not env_vars.env_disable_auth:
-    if not os.path.exists(users_file):
-        os.makedirs(os.path.dirname(users_file), exist_ok=True)
-        with open(users_file, 'w') as file:
-            file.write("""
+
+def _get_users_file():
+    return os.path.join(env_vars.env_data_folder, 'users.yaml')
+
+
+def _get_config():
+    global _config
+    if _config is None:
+        # Load the configuration file with the user credentials
+        if not env_vars.env_disable_auth:
+            if not os.path.exists(_get_users_file()):
+                os.makedirs(os.path.dirname(_get_users_file()), exist_ok=True)
+                with open(_get_users_file(), 'w') as file:
+                    file.write("""
 credentials:
   usernames:
 cookie:
@@ -22,8 +30,9 @@ cookie:
   key: 856_some_$0-signature_key
   name: strmlt-pld
 """)
-    with open(users_file) as file:
-        config = yaml.load(file, Loader=SafeLoader)
+            with open(_get_users_file()) as file:
+                _config = yaml.load(file, Loader=SafeLoader)
+    return _config
 
 
 def get_auth(config):
@@ -49,7 +58,7 @@ def authenticate() -> stauth.Authenticate | str | None:
     if env_vars.env_disable_auth:
         return 'disabled'
 
-    authenticator = get_auth(config)
+    authenticator = get_auth(_get_config())
 
     # authenticator.login('Login', 'main')
     # Init session vars without showing a login to avoid UI blinking
@@ -85,8 +94,8 @@ def authenticate() -> stauth.Authenticate | str | None:
             try:
                 if authenticator.register_user('Register a new user', preauthorization=False, skipEmail=True):
                     st.success('User registered successfully')
-                    with open(users_file, 'w') as file:
-                        yaml.dump(config, file, default_flow_style=False)
+                    with open(_get_users_file(), 'w') as file:
+                        yaml.dump(_get_config(), file, default_flow_style=False)
                     # st.session_state['view_mode'] = 'login'
             except Exception as e:
                 st.error(e)
