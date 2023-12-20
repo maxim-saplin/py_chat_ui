@@ -121,7 +121,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         st.session_state['canceled_prompt'] = None
 
 
-def get_and_display_ai_reply(client: util.OpenAI, model: state.Model,
+def get_and_display_ai_reply(client, model: state.Model,
                              chat_session: state.ChatSession) -> None:
     if st.session_state['get_and_display_ai_reply_BREAK']:
         return

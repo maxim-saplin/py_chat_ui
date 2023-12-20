@@ -1,10 +1,9 @@
-from openai import OpenAI, AzureOpenAI
-import tiktoken
 from logic import env_vars
 from logic.user_state import Model
 
 
-def create_client(model: Model) -> OpenAI:
+def create_client(model: Model):
+    from openai import OpenAI, AzureOpenAI
     if model.api_type == env_vars.ApiTypeOptions.AZURE:
         return AzureOpenAI(api_key=model.api_key,
                            azure_endpoint=model.api_base,
@@ -17,11 +16,16 @@ def create_client(model: Model) -> OpenAI:
         return OpenAI(api_key=model.api_key, base_url=base_url)
 
 
-encoding = tiktoken.get_encoding("cl100k_base")
+encoding = None
 
 
 def num_tokens_from_messages(messages: list[dict]) -> int:
     """Return the number of tokens used by a list of messages."""
+    import tiktoken
+    global encoding
+
+    if not encoding:
+        encoding = tiktoken.get_encoding("cl100k_base")
 
     if not messages:
         return 0
