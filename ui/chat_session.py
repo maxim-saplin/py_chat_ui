@@ -27,7 +27,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
     # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
-        txt = st.text_area("tokenizer").strip()
+        txt = st.text_area("tokenizer2").strip()
         st.form_submit_button("Submit")
         if txt != st.session_state['prompt_for_tokenizer'] \
                 and not (txt == '' and st.session_state['prompt_for_tokenizer'] is None):

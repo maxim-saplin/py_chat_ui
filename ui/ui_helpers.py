@@ -278,7 +278,7 @@ chatInput.dispatchEvent(event);
 
 def embed_chat_input_js():
     embed_chat_tokenizer_js('.stChatInputContainer textarea',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer"]')
+                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]')
 
 
 def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str):
