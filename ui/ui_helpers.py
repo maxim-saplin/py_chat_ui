@@ -161,11 +161,16 @@ def new_chat_collapse_markdown_hidden_elements():
     st.write("""
         <style>
             section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
-                margin-top: -80px;
+                margin-top: -150px;
                 margin-bottom: -80px;
             }
         </style>
     """, unsafe_allow_html=True)
+
+
+def new_chat_calculate_tokens():
+    embed_chat_tokenizer_js('section[tabindex="0"] textarea[aria-label="Prompt"]',
+                            'section[tabindex="0"] textarea[aria-label="tokenizer"]')
 
 
 def settings_collapse_markdown_hidden_elements():
@@ -272,47 +277,55 @@ chatInput.dispatchEvent(event);
 
 
 def embed_chat_input_js():
+    embed_chat_tokenizer_js('.stChatInputContainer textarea',
+                            'section[tabindex="0"] textarea[aria-label="tokenizer"]')
+
+
+def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str):
     js = """
 <script>
-//console.log("Chat input handler is activating...");
-
 let previousValue = '';
-const originalTextArea = window.parent.document.querySelector('.stChatInputContainer textarea');
-const originalButton = window.parent.document.querySelector('.stChatInputContainer button');
-const formInput = window.parent.document.querySelector('div[data-testid="stForm"] input');
-const formButton = window.parent.document.querySelector('div[data-testid="stForm"] button');
+const originalTextArea = window.parent.document.querySelector('""" + srcSelector + """');
+const formTextArea = window.parent.document.querySelector('""" + dstSelector + """');
 
-if (originalButton){
-    originalButton.addEventListener('click', () => {
-    console.log('Button clicked with text:');
-    });
-
-    originalTextArea.addEventListener('keyup', () => {
+if (originalTextArea && formTextArea) {
+    originalTextArea.addEventListener('input', (event) => {
+        //console.log("Key Up");
         clearTimeout(window.debounceTimeout);
         window.debounceTimeout = setTimeout(() => {
             if (originalTextArea.value !== previousValue) {
-                console.log("Chat input text changed");
+                console.log("Prompt input text changed");
 
                 const nativeInputValueSetter =
-                    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value").set;
-                nativeInputValueSetter.call(formInput, originalTextArea.value);
+                    Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                nativeInputValueSetter.call(formTextArea, originalTextArea.value);
                 const event = new Event('input', { bubbles: true });
-                formInput.dispatchEvent(event);
+                formTextArea.dispatchEvent(event);
 
-                previousValue = originalTextArea.value;
+                previousValue = formTextArea.value;
 
                 setTimeout(() => {
-                    formButton.click();
+                    let event = new KeyboardEvent('keydown', {
+                        key: 'Enter',
+                        keyCode: 13, // Enter key's keyCode is 13
+                        metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
+                        ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
+                        altKey: false,
+                        shiftKey: false,
+                        bubbles: true
+                    });
+
+                    formTextArea.dispatchEvent(event);
+
                 }, 100);
             }
-        }, 1200);
+        }, 800);
     });
-    console.log("Chat input handler is active");
+    console.log("Prompt input handler is active");
 }
 else {
-    console.log("Chat input not active, chat input not found");
+    console.log("Prompt input not active, chat input not found");
 }
-
 </script>
-    """
+"""
     html(js, 0, 0, False)

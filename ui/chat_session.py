@@ -19,7 +19,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
     if 'get_and_display_ai_reply_BREAK' not in st.session_state:
         st.session_state['get_and_display_ai_reply_BREAK'] = False
 
-    hide_tokinzer_workaround_form()
+    # hide_tokinzer_workaround_form()
     chat_bottom_padding()
     chat_collapse_markdown_hidden_elements()
     cancel_generation_button_styles()
@@ -27,9 +27,10 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
     # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
-        txt = st.text_input("hidden prompt for tokenizer").strip()
-        submitted = st.form_submit_button("Submit")
-        if submitted and txt != st.session_state['prompt_for_tokenizer']:
+        txt = st.text_area("tokenizer").strip()
+        st.form_submit_button("Submit")
+        if txt != st.session_state['prompt_for_tokenizer'] \
+                and not (txt == '' and st.session_state['prompt_for_tokenizer'] is None):
             st.session_state['prompt_for_tokenizer'] = None if txt == '' else txt
             st.rerun()
 
