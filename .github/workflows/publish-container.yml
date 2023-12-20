@@ -43,6 +43,7 @@ jobs:
         run: |
           VERSION=$(awk 'NR==1 {print $3}' main.py | tr -d "'")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "Extracted version: $VERSION"
   
       - name: Build and push Docker image with source code version tag
         uses: docker/build-push-action@v2
