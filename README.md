@@ -114,6 +114,7 @@ Open `localhost:8501` in browser when the container is started.
 
 ## Changelog
 
+- 0.2.8 - on-the-fly tokenizer form in dialog is fixed (was visible due to a bug)
 - 0.2.7 - refactored tokenizer in dialog and new chat, better stratup time (module lazy load)
 - 0.2.6 - env var model no longer saved to models file
 - 0.2.5 - better handling of empty env vars, building/publishing container images for AMD64 and ARM64 architectures
