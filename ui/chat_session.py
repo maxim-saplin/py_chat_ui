@@ -40,6 +40,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
             if st.button('Cancel generation'):
                 st.session_state['generating'] = False
                 st.session_state['get_and_display_ai_reply_BREAK'] = True
+                st.session_state['generating'] = False
                 try:
                     st.session_state['canceled_prompt'] = chat_session.messages[-1]['content']
                 except Exception as e:
