@@ -1,7 +1,7 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
 from logic.utility import num_tokens_from_messages
-from ui.ui_helpers import hide_tokinzer_workaround_form, new_chat_calculate_tokens, \
+from ui.ui_helpers import hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
     new_chat_collapse_markdown_hidden_elements
 
 
@@ -9,7 +9,7 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
                    system_message: str, temperature: float) -> dict:
 
     new_chat_collapse_markdown_hidden_elements()
-    hide_tokinzer_workaround_form()
+    hide_tokenzer_workaround_form()
     new_chat_calculate_tokens()
 
     if 'nc_chat_token_count' not in st.session_state:

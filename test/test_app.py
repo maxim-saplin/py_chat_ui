@@ -35,10 +35,41 @@ def test_fake_model_on_startup():
     env_vars.print_debug()
     app_test = AppTest.from_file("main.py")
     app_test.run()
-    print_debug(app_test)
+    # print_debug(app_test)
     assert not app_test.exception
     select = app_test.selectbox('select_model_dropdown')
     assert select.value == 'Fake auto-reply model (demonstration)'
+
+
+def test_chat_strated():
+    env_vars.reset_env_to_default(env_data_folder=tmp_dir)
+    env_vars.print_debug()
+    app_test = AppTest.from_file("main.py")
+    app_test.run()
+    prompt_text_area = next((widget for widget in app_test.text_area if widget.label == 'Prompt'), None)
+    assert prompt_text_area is not None, "Prompt text area not found"
+    prompt_text_area.set_value('TEST MESSAGE')
+    send_button = next((button for button in app_test.button if button.label == 'Send'), None)
+    assert send_button is not None, "Send button not found"
+    send_button.click().run()
+    assert len(app_test.button) == 3, "Button list does not contain 3 elements"
+    assert app_test.button[0].label == 'Delete Chat', "First button is not 'Delete Chat'"
+    assert app_test.button[1].label == 'Cancel generation', "Second button is not 'Cancel generation'"
+    assert app_test.button[2].key == 'FormSubmitter:hidden-Submit', "Third button key is not 'FormSubmitter:hidden-Submit'"
+    assert app_test.button[2].label == 'Submit', "Third button label is not 'Submit'"
+    assert app_test.button[2].form_id == 'hidden', "Third button form_id is not 'hidden'"
+    # print_debug(app_test)
+
+
+# def test_settings_screen():
+#     env_vars.reset_env_to_default(env_data_folder=tmp_dir)
+#     env_vars.print_debug()
+#     app_test = AppTest.from_file("main.py", default_timeout=300)
+#     app_test.run()
+#     # print_debug(app_test)
+#     app_test.session_state['selected_menu'] = 'Settings'
+#     app_test.run()
+#     print_debug(app_test)
 
 
 # @patch('ui.login.authenticate')
@@ -84,3 +115,6 @@ def print_debug(app_test):
                 print(f"{attr_name} has {len(attr)} elements")
                 for i, element in enumerate(attr):
                     print(f"  Element {i}: {element}")
+    if hasattr(app_test, 'sidebar') and app_test.sidebar is not None:
+        print('SIDEBAR')
+        print_debug(app_test.sidebar)

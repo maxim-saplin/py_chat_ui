@@ -138,7 +138,7 @@ def hide_streamlit_menu():
 """, unsafe_allow_html=True)
 
 
-def hide_tokinzer_workaround_form():
+def hide_tokenzer_workaround_form():
     st.write("""
     <style>
         div[data-testid="stForm"] {
@@ -170,7 +170,8 @@ def new_chat_collapse_markdown_hidden_elements():
 
 def new_chat_calculate_tokens():
     embed_chat_tokenizer_js('section[tabindex="0"] textarea[aria-label="Prompt"]',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer"]')
+                            'section[tabindex="0"] textarea[aria-label="tokenizer"]',
+                            300)
 
 
 def settings_collapse_markdown_hidden_elements():
@@ -281,51 +282,53 @@ def embed_chat_input_js():
                             'section[tabindex="0"] textarea[aria-label="tokenizer2"]')
 
 
-def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str):
+def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str, debounceTimeout: int = 800):
     js = """
 <script>
-let previousValue = '';
-const originalTextArea = window.parent.document.querySelector('""" + srcSelector + """');
-const formTextArea = window.parent.document.querySelector('""" + dstSelector + """');
+setTimeout(() => {
+    let previousValue = '';
+    const originalTextArea = window.parent.document.querySelector('""" + srcSelector + """');
+    const formTextArea = window.parent.document.querySelector('""" + dstSelector + """');
 
-if (originalTextArea && formTextArea) {
-    originalTextArea.addEventListener('input', (event) => {
-        //console.log("Key Up");
-        clearTimeout(window.debounceTimeout);
-        window.debounceTimeout = setTimeout(() => {
-            if (originalTextArea.value !== previousValue) {
-                console.log("Prompt input text changed");
+    if (originalTextArea && formTextArea) {
+        originalTextArea.addEventListener('input', (event) => {
+            //console.log("Key Up");
+            clearTimeout(window.debounceTimeout);
+            window.debounceTimeout = setTimeout(() => {
+                if (originalTextArea.value !== previousValue) {
+                    console.log("Prompt input text changed");
 
-                const nativeInputValueSetter =
-                    Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
-                nativeInputValueSetter.call(formTextArea, originalTextArea.value);
-                const event = new Event('input', { bubbles: true });
-                formTextArea.dispatchEvent(event);
-
-                previousValue = formTextArea.value;
-
-                setTimeout(() => {
-                    let event = new KeyboardEvent('keydown', {
-                        key: 'Enter',
-                        keyCode: 13, // Enter key's keyCode is 13
-                        metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
-                        ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
-                        altKey: false,
-                        shiftKey: false,
-                        bubbles: true
-                    });
-
+                    const nativeInputValueSetter =
+                        Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
+                    nativeInputValueSetter.call(formTextArea, originalTextArea.value);
+                    const event = new Event('input', { bubbles: true });
                     formTextArea.dispatchEvent(event);
 
-                }, 100);
-            }
-        }, 800);
-    });
-    console.log("Prompt input handler is active");
-}
-else {
-    console.log("Prompt input not active, chat input not found");
-}
+                    previousValue = formTextArea.value;
+
+                    setTimeout(() => {
+                        let event = new KeyboardEvent('keydown', {
+                            key: 'Enter',
+                            keyCode: 13, // Enter key's keyCode is 13
+                            metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
+                            ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
+                            altKey: false,
+                            shiftKey: false,
+                            bubbles: true
+                        });
+
+                        formTextArea.dispatchEvent(event);
+
+                    }, 100);
+                }
+            },""" + str(debounceTimeout) + """);
+        });
+        console.log("Prompt input handler is active");
+    }
+    else {
+        console.log("Prompt input not active, chat input not found");
+    }
+}, 150);
 </script>
 """
     html(js, 0, 0, False)
