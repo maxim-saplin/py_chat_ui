@@ -114,6 +114,7 @@ Open `localhost:8501` in browser when the container is started.
 
 ## Changelog
 
+- 0.2.11 - added FavIcon
 - 0.2.10 - fixing inconsistent cancelation of generation
 - 0.2.9 - updated dockerfile to use Python 3.12, more swift tokenizer (shorter debounce timer when typing), refactorer chat dialog logic (showing ... as a placeholder when OpenAI request is sent), 1 more autotest
 - 0.2.8 - on-the-fly tokenizer form in dialog is fixed (was visible due to a bug)

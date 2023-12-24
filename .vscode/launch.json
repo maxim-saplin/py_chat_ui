@@ -15,6 +15,7 @@
            "run",
            "main.py"
        ],
+       "justMyCode": false,
        "jinja": true
    },
   ]

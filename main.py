@@ -1,4 +1,4 @@
-__version__ = '0.2.10'
+__version__ = '0.2.11'
 
 import streamlit as st
 from logic.user_state import init
@@ -13,7 +13,7 @@ start_time = time.time()
 
 st.set_page_config(
     page_title='Py Chat',
-    page_icon='ツ'
+    page_icon='ui/icon.png'
 )
 
 st.session_state['version'] = __version__
