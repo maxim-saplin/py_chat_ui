@@ -48,35 +48,38 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 chat_session.delete_last_user_message()
                 st.rerun()
 
+        # if st.session_state['generating'] and chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+
         if not st.session_state['generating']:
+            # Tried doing nicely server-sde (setting sttuds to generating after promnpt, show stop button etc.)
+            # Yet it srrms the st.chat_input() does way more behind the scenese, when OpenAI ran streaming response
+            # thre were some silen failures under the hood of streamlit and not chat generation worked, reliably
+            # Deffering to js tricks and toggling control's visibility
+
+            prompt = None
+            user_message_last = False
             # User prompt came in from New Chat
             if chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+                prompt = chat_session.messages[-1]['content']
+                user_message_last = True
+            else:
+                prompt = st.chat_input('What is up?', disabled=st.session_state['generating'])
+
+            if prompt is not None:
                 st.session_state['token_count'] = None
+                st.session_state['prompt_for_tokenizer'] = None
+                st.session_state['generating'] = True
+                if not user_message_last:
+                    chat_session.add_message({'role': 'user', 'content': prompt})
                 show_cancel_generate_button_js()
+                with st.chat_message('assistant', avatar='ui/user.png'):
+                    st.markdown(prompt)
                 with st.chat_message('assistant', avatar='ui/ai.png'):
-                    st.session_state['generating'] = True
+                    message_placeholder = st.empty()
                     st.session_state['get_and_display_ai_reply_BREAK'] = False
-                    get_and_display_ai_reply(util.create_client(model), model, chat_session)
+                    get_and_display_ai_reply(util.create_client(model), model, chat_session, message_placeholder)
                     st.session_state['generating'] = False
                     st.rerun()
-            else:
-                # Tried doing nicely server-sde (setting sttuds to generating after promnpt, show stop button etc.)
-                # Yet it srrms the st.chat_input() does way more behind the scenese, when OpenAI ran streaming response
-                # thre were some silen failures under the hood of streamlit and not chat generation worked, reliably
-                # Deffering to js tricks and toggling control's visibility
-                if prompt := st.chat_input('What is up?', disabled=st.session_state['generating']):
-                    st.session_state['token_count'] = None
-                    st.session_state['prompt_for_tokenizer'] = None
-                    st.session_state['generating'] = True
-                    chat_session.add_message({'role': 'user', 'content': prompt})
-                    show_cancel_generate_button_js()
-                    with st.chat_message('assistant', avatar='ui/user.png'):
-                        st.markdown(prompt)
-                    with st.chat_message('assistant', avatar='ui/ai.png'):
-                        st.session_state['get_and_display_ai_reply_BREAK'] = False
-                        get_and_display_ai_reply(util.create_client(model), model, chat_session)
-                        st.session_state['generating'] = False
-                        st.rerun()
 
             st.session_state['generating'] = False
 
@@ -126,12 +129,12 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
 
 
 def get_and_display_ai_reply(client, model: state.Model,
-                             chat_session: state.ChatSession) -> None:
+                             chat_session: state.ChatSession,
+                             message_placeholder) -> None:
     if st.session_state['get_and_display_ai_reply_BREAK']:
         return
     print('get_and_display_ai_reply')
     try:
-        message_placeholder = st.empty()
         full_response = ''
         message_placeholder.markdown('...')
 
