@@ -3,8 +3,8 @@ import logic.user_state as state
 import logic.utility as util
 from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_elements, right_align_2nd_col_tokenizer,
                            show_cancel_generate_button_js, set_chat_input_text,
-                           embed_chat_input_js, hide_tokenzer_workaround_form,
-                           show_generate_chat_input_js, cancel_generation_button_styles)
+                           embed_chat_input_tokenizer, hide_tokenzer_workaround_form,
+                           show_stop_generate_chat_input_js, cancel_generation_button_styles)
 
 
 def show_chat_session(chat_session: state.ChatSession, model: state.Model):
@@ -71,9 +71,9 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 st.session_state['generating'] = True
                 if not user_message_last:
                     chat_session.add_message({'role': 'user', 'content': prompt})
+                    with st.chat_message('assistant', avatar='ui/user.png'):
+                        st.markdown(prompt)
                 show_cancel_generate_button_js()
-                with st.chat_message('assistant', avatar='ui/user.png'):
-                    st.markdown(prompt)
                 with st.chat_message('assistant', avatar='ui/ai.png'):
                     message_placeholder = st.empty()
                     st.session_state['get_and_display_ai_reply_BREAK'] = False
@@ -90,17 +90,19 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
             st.write('An error occurred while sending Chat API request')
             st.write(e)
 
-    # Hidden elements to trigger server side counting of token in chat input
-    with st.form("hidden"):
-        txt = st.text_area("tokenizer2").strip()
-        st.form_submit_button("Submit")
-        if txt != st.session_state['prompt_for_tokenizer'] \
-                and not (txt == '' and st.session_state['prompt_for_tokenizer'] is None):
-            st.session_state['prompt_for_tokenizer'] = None if txt == '' else txt
-            st.rerun()
+    if not st.session_state['generating']:
+        # Hidden elements to trigger server side counting of token in chat input
+        with col2:
+            with st.form("hidden"):
+                txt = st.text_area("tokenizer2").strip()
+                st.form_submit_button("Submit")
+                if txt != st.session_state['prompt_for_tokenizer'] \
+                        and not (txt == '' and st.session_state['prompt_for_tokenizer'] is None):
+                    st.session_state['prompt_for_tokenizer'] = None if txt == '' else txt
+                    st.rerun()
+            embed_chat_input_tokenizer()
 
-    embed_chat_input_js()
-    show_generate_chat_input_js()
+    show_stop_generate_chat_input_js()
     # Cancelation happened, fill in chat input with past prompt
     if st.session_state['canceled_prompt'] not in (None, ''):
         set_chat_input_text(st.session_state['canceled_prompt'])
