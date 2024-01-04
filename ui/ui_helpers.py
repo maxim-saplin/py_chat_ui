@@ -230,16 +230,18 @@ def cancel_generation_button_styles():
     """, unsafe_allow_html=True)
 
 
+stop_button_selector =\
+    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton'
+
+
 def show_cancel_generate_button_js():
     """
     And hide chat input
     """
-
-    js = """
+    js = f"""
 <script>
 console.log("show_generate_button_js");
-const stopButton = window.parent.document.querySelector(
-    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
+const stopButton = window.parent.document.querySelector('{stop_button_selector}');
 stopButton.style.visibility = 'visible';
 const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
 chatInputContainer.style.visibility = 'hidden';
@@ -249,11 +251,10 @@ chatInputContainer.style.visibility = 'hidden';
 
 
 def show_stop_generate_chat_input_js():
-    js = """
+    js = f"""
 <script>
 console.log("show_generate_chat_input_js");
-const stopButton = window.parent.document.querySelector(
-    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton');
+const stopButton = window.parent.document.querySelector('{stop_button_selector}');
 if (stopButton) stopButton.style.visibility = 'hidden';
 const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
 if (chatInputContainer) chatInputContainer.style.visibility = 'visible';
@@ -279,10 +280,13 @@ chatInput.dispatchEvent(event);
 
 def embed_chat_input_tokenizer():
     embed_chat_tokenizer_js('.stChatInputContainer textarea',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]')
+                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]', 700, stop_button_selector)
 
 
-def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str, debounceTimeout: int = 800):
+def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str, debounceTimeout: int = 800, cancelSelector: str = ""):
+    """
+    cancelSelector - if present in DOM, no action will take place
+    """
     js = """
 <script>
 setTimeout(() => {
@@ -307,17 +311,30 @@ setTimeout(() => {
                     previousValue = formTextArea.value;
 
                     setTimeout(() => {
-                        let event = new KeyboardEvent('keydown', {
-                            key: 'Enter',
-                            keyCode: 13, // Enter key's keyCode is 13
-                            metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
-                            ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
-                            altKey: false,
-                            shiftKey: false,
-                            bubbles: true
-                        });
+                        selector = '""" + cancelSelector + """';
+                        const cancelElement = selector ? window.parent.document.querySelector(selector) : null;
+                        let computedStyle = null;
+                        if (cancelElement) {
+                            computedStyle = window.parent.window.getComputedStyle(cancelElement);
+                        }
+                        //console.log(computedStyle)
+                        if (!computedStyle || computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
+                            let event = new KeyboardEvent('keydown', {
+                                key: 'Enter',
+                                keyCode: 13, // Enter key's keyCode is 13
+                                metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
+                                ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
+                                altKey: false,
+                                shiftKey: false,
+                                bubbles: true
+                            });
 
-                        formTextArea.dispatchEvent(event);
+                            formTextArea.dispatchEvent(event);
+                            console.log('STYLE-OK')
+                        }
+                        else {
+                            console.log('STYLE-NOT-OK')
+                        }
 
                     }, 100);
                 }

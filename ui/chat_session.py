@@ -48,7 +48,10 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 chat_session.delete_last_user_message()
                 st.rerun()
 
-        # if st.session_state['generating'] and chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+        # Recovery from inconsistent state
+        if st.session_state['generating'] and chat_session.messages and chat_session.messages[-1]['role'] == 'user':
+            st.session_state['generating'] = False
+        #     st.session_state['get_and_display_ai_reply_BREAK'] = True
 
         if not st.session_state['generating']:
             # Tried doing nicely server-sde (setting sttuds to generating after promnpt, show stop button etc.)
