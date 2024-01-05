@@ -1,4 +1,4 @@
-__version__ = '0.2.15'
+__version__ = '0.2.16'
 
 import streamlit as st
 from logic.user_state import init
