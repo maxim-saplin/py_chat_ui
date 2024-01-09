@@ -1,4 +1,4 @@
-__version__ = '0.2.16'
+__version__ = '0.2.17'
 
 import streamlit as st
 from logic.user_state import init
@@ -6,7 +6,6 @@ from ui.login import authenticate, show_logout, get_user_name, get_enc_key
 from ui.home import show_home
 from ui.ui_helpers import global_ui_tweaks, hide_streamlit_menu, hide_streamlit_toolbar
 import time
-
 
 # print('Py Chat, Request received')
 start_time = time.time()
