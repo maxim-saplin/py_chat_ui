@@ -7,8 +7,8 @@ Your private chat UI for OpenaAI/Azure APIs. Deploy anywhere, fill in API Key et
 ## Features
 
 - **Token counter**: get number of tokens in the dialog and in the prompt being typed
-- **Minimal, responsivee UI**: supports PWA, can be added to home-screen on mobile
   - Can be seen at the top right corner, counts dialog length + the number of tokens in the promnpt being typed
+- **Minimal, responsive UI**: adapts to small and large screens, can be added to home-screen on mobile
 - **Azure and OpenAI**: Connect to OpenAI APIs either directly (via API key) or via models deployed in Microsoft Azure
  - Use it as chat UI for local models that support OpenAI chat API, you can define `base_url` when adding OpenAI models
 - **Can be deployed as a single container:** no dependencies on Postgress, all data is stored in local files and encrypted
