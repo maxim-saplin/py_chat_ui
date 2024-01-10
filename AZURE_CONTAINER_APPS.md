@@ -36,3 +36,21 @@ Choose 'ghcr.io' (GitHub Container registry) and 'ghcr.io/maxim-saplin/py_chat_u
 
 Choose runtime/reosurce allocation for the container. The minimal 0.25CPU and 0.5Gi MEM is enough to run the app.
 
+#### 3.1 [OPTIONAL] Configure the app using ENV variables
+
+At this step you can define environment variables controlling the behaviour of the app, such as disabling authentucation OR setting OpenAI/Azure endpoints for GPT 3.5/4 API. You can leave this configs as-is. By defualt the app has a registration screen allowing anybody to register, the model creds can be defined via the UI (API key etc.). You can also change this settings latter at Container App screen creating a new Revision (left side menu).
+
+[Full list of ENV configs is here](https://github.com/maxim-saplin/py_chat_ui#evironment-variables)
+
+
+
+### 4. Expose container app to the Internet
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/9588d959-93e6-413e-bc60-745c0af8a0ec)
+
+Make sure ingress is enabled, keep settings as in the above screenshot.
+
+### 5. Complete service creation
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/4aefce93-ae50-430b-a272-54481aa227dd)
+
