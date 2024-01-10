@@ -43,7 +43,6 @@ At this step you can define environment variables controlling the behaviour of t
 [Full list of ENV configs is here](https://github.com/maxim-saplin/py_chat_ui#evironment-variables)
 
 
-
 ### 4. Expose container app to the Internet
 
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/9588d959-93e6-413e-bc60-745c0af8a0ec)
@@ -53,4 +52,20 @@ Make sure ingress is enabled, keep settings as in the above screenshot.
 ### 5. Complete service creation
 
 ![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/4aefce93-ae50-430b-a272-54481aa227dd)
+
+## Access the app over the internet
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/d3333ec4-dce6-4c8a-9f8f-5e4c5172f988)
+
+When you open the newly created Conter App service at the `Overview` tab on the top right you will see the public URL. You can click the link and go to the login screen.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/7aef489c-9fbe-4487-acbc-6690b01a590e)
+
+If no ENV vars have been set you will get `Register a new user` link available, go there and create a new user. Use the creds to access the app.
+
+You can also disable user authentication OR user registration via [ENV variables](https://github.com/maxim-saplin/py_chat_ui#evironment-variables). If authentication is disabled you can configure Azure to disallow anonymous access and use a valid Microsoft account to access web app via URL (via Azure AD).
+
+## Configure storage account, store backend files on Azure SMB
+
+
 
