@@ -67,5 +67,52 @@ You can also disable user authentication OR user registration via [ENV variables
 
 ## Configure storage account, store backend files on Azure SMB
 
+Container can be reloaded any time, all data stored in local folder will be lost. If you set minimum number of replicas to be 0 when creating Container App you can expect the container to be released in a few hours after inactivity. You can set the minimal replicas to be at least 1 - this can give the container a few days before it will be restarted.
+
+In order to ensure that whatever data is stored by the backend is persisted an external volume must be created. We will use Azure Storage Account and createa an SMB folder and point the container to use this path as a location to store its' data files.
+
+!! As long as you don't care about persistance of your dialogs and user registration you can skip this part nad proceed using single container which writes to ephemeral storage.
+
+### 1. Create storage account
+
+At the top of Azure Portal type "Storage account" and go to the list of accounts.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/c7827056-20c4-48d5-ac11-d4151e86bd87)
+
+Create a new storage account (OR pick an existing one).
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/8023b6f4-f8dd-4b5c-9ba7-b8132c070cf7)
+
+### 2. Create a new `File Share` under the storage account.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/78571a6a-0123-46ee-908e-ed0190ce0fc8)
+
+5 TiB is the minimal file share size, you will actually pay for the storage used, expect hunderds of killobytes and up to few megabytes of data would be required for a typical single user chat history.
+
+### 3. Add the file share to container's managed environment
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/bc24e937-ea83-4273-869e-c44061485c23)
+
+At first you need to copy the access key to the sotrage account where the file share has been created.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/115eb009-e911-499e-8497-d3374f191774)
+
+Next you need to go managed environment of the container app. Yt is created along with container app, you can navigate to the correspinding page from Container App's overview page. Over there you add the newly created file share and use the access key for the storage account where the file share was created. Make sure to pick 'Read/Write' access mode.
+
+### 4. Create a new revision of the Container App with the File Share enabled
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/60f95d2f-72ea-44cc-91da-9325d8d95b8a)
+
+Open Container App service, go to 'Revisions' tab and create a new revision.
+
+![image](https://github.com/maxim-saplin/py_chat_ui/assets/7947027/ff76d9b4-06ca-4d93-a00c-70edf14b6a07)
+
+Click the existing container and edit it. In the side bar make sure that use define 'DATA_DIR' to point to a volume which will be our file share mount. E.g. '/chatdata'
+
+
+
+ 
+
+
 
 
