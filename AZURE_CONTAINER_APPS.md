@@ -112,6 +112,7 @@ At the 'Volumes' tab you should be able to add the file share and point it to '/
 
 Complete the configuration by creating this new revision and deleting the old revision. You should be good to access the app now with data persisted in file share.
 
+You can access the file share and view/edit the files. E.g. you might want to disable user registration and manage users via [manually updating `users.yaml` file](https://github.com/maxim-saplin/py_chat_ui/tree/main#local-user-db)
 
 
 
