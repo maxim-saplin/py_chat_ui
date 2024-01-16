@@ -16,6 +16,8 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
         st.session_state['nc_chat_token_count'] = None
     if 'nc_prompt_for_tokenizer' not in st.session_state:
         st.session_state['nc_prompt_for_tokenizer'] = None
+    if 'nc_submitted' not in st.session_state:
+        st.session_state['nc_submitted'] = False
 
     # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
@@ -43,8 +45,12 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     temperature = st.slider('Temperature', 0.0, 1.0, temperature, 0.01)
     button_title = "Send" if st.session_state['nc_chat_token_count'] is None \
         else f"Send ({st.session_state['nc_chat_token_count']} tokens)"
-    prompt = st.text_area('Prompt')
-    if st.button(button_title, type="primary"):
+
+    def on_prompt_change():
+        st.session_state['nc_submitted'] = True
+
+    prompt = st.text_area('Prompt', key='prompt_text_area', on_change=on_prompt_change)
+    if st.button(button_title, type="primary") or st.session_state['nc_submitted']:
         if prompt:
             session = session_manager.create_session(model, ' '.join(prompt.split()[:5]))
 
@@ -57,6 +63,8 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             # st.session_state['new_chat_prompt'] = None
             st.session_state['nc_chat_token_count'] = None
             st.session_state['show_chat_session'] = True
+
+    st.session_state['nc_submitted'] = False
 
     # Return the updated state
     state_update = {

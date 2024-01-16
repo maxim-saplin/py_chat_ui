@@ -18,6 +18,12 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
         st.session_state['canceled_prompt'] = None
     if 'get_and_display_ai_reply_BREAK' not in st.session_state:
         st.session_state['get_and_display_ai_reply_BREAK'] = False
+    if 'prev_chat_session' not in st.session_state:
+        st.session_state['prev_chat_session'] = None
+
+    if chat_session != st.session_state['prev_chat_session']:
+        st.session_state['token_count'] = None  # if a new chat session is open - recalculate messages size
+        st.session_state['prev_chat_session'] = chat_session
 
     hide_tokenzer_workaround_form()
     chat_bottom_padding()
