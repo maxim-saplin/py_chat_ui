@@ -171,7 +171,7 @@ def new_chat_collapse_markdown_hidden_elements():
 def new_chat_calculate_tokens():
     embed_chat_tokenizer_js('section[tabindex="0"] textarea[aria-label="Prompt"]',
                             'section[tabindex="0"] textarea[aria-label="tokenizer"]',
-                            300)
+                            1500)
 
 
 def settings_collapse_markdown_hidden_elements():
@@ -280,7 +280,7 @@ chatInput.dispatchEvent(event);
 
 def embed_chat_input_tokenizer():
     embed_chat_tokenizer_js('.stChatInputContainer textarea',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]', 500,
+                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]', 1500,
                             stop_button_selector,
                             '.stChatInputContainer button')
 
