@@ -156,3 +156,4 @@ cython_debug/
 .data/
 .DS_Store
 .aider*
+/default-venv
