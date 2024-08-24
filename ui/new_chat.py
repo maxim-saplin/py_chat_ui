@@ -1,7 +1,7 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
 from logic.utility import num_tokens_from_messages
-from ui.ui_helpers import add_command_enter_handler, hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
+from ui.ui_helpers import new_chat_add_command_enter_handler, hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
     new_chat_collapse_markdown_hidden_elements
 
 
@@ -11,7 +11,7 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     new_chat_collapse_markdown_hidden_elements()
     hide_tokenzer_workaround_form()
     new_chat_calculate_tokens()
-    add_command_enter_handler()
+    new_chat_add_command_enter_handler()
 
     if 'nc_chat_token_count' not in st.session_state:
         st.session_state['nc_chat_token_count'] = None
@@ -56,7 +56,6 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
 
             model.temperature = temperature
             model_repository.update(model.alias, model)
-            # st.session_state['new_chat_prompt'] = None
             st.session_state['nc_chat_token_count'] = None
             st.session_state['show_chat_session'] = True
 
