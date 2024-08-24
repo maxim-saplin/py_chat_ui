@@ -331,11 +331,11 @@ setTimeout(() => {
                             computedStyle = window.parent.window.getComputedStyle(cancelElement);
                         }
                         if (!computedStyle || computedStyle.display === 'none' || computedStyle.visibility === 'hidden') {
-                            let newEvent = new KeyboardEvent('keydown', {
+                            const newEvent = new KeyboardEvent('keydown', {
                                 key: 'Enter',
                                 keyCode: 13, // Enter key's keyCode is 13
                                 metaKey: true, // metaKey is true if Cmd is pressed (on Mac)
-                                ctrlKey: false, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
+                                ctrlKey: true, // Use true if you want to simulate Ctrl+Enter on non-Mac systems
                                 altKey: false,
                                 shiftKey: false,
                                 bubbles: true
@@ -357,3 +357,28 @@ setTimeout(() => {
 </script>
 """
     html(js, 0, 0, False)
+
+def add_command_enter_handler():
+   js = """
+<script>
+setTimeout(() => {
+    const promptTextArea = window.parent.document.querySelector('textarea[aria-label="Prompt"]');
+    const primaryButton = window.parent.document.querySelector('button[kind="primary"][data-testid="baseButton-primary"]');
+
+    if (promptTextArea && primaryButton) {
+        promptTextArea.addEventListener('keydown', (event) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                event.preventDefault(); // Prevents the default behavior for Enter key
+                const clickEvent = new MouseEvent('input', { bubbles: true });
+                primaryButton.dispatchEvent(clickEvent); // Programmatically dispatches a click event
+                console.log("Cmd/Ctrl + Enter pressed, button clicked");
+            }
+        });
+    } else {
+        console.log("Textarea or button not found");
+    }
+}, 100); // Adjust the timeout as necessary
+</script>
+"""
+   html(js, 0, 0, False)
+

@@ -1,7 +1,7 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
 from logic.utility import num_tokens_from_messages
-from ui.ui_helpers import hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
+from ui.ui_helpers import add_command_enter_handler, hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
     new_chat_collapse_markdown_hidden_elements
 
 
@@ -11,13 +11,12 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     new_chat_collapse_markdown_hidden_elements()
     hide_tokenzer_workaround_form()
     new_chat_calculate_tokens()
+    add_command_enter_handler()
 
     if 'nc_chat_token_count' not in st.session_state:
         st.session_state['nc_chat_token_count'] = None
     if 'nc_prompt_for_tokenizer' not in st.session_state:
         st.session_state['nc_prompt_for_tokenizer'] = None
-    if 'nc_submitted' not in st.session_state:
-        st.session_state['nc_submitted'] = False
 
     # Hidden elements to trigger server side counting of token in chat input
     with st.form("hidden"):
@@ -28,7 +27,6 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             st.session_state['nc_prompt_for_tokenizer'] = None if txt == '' else txt
             st.session_state['nc_chat_token_count'] = None if st.session_state['nc_prompt_for_tokenizer'] is None \
                 else num_tokens_from_messages([{'role': 'User', 'content': txt}])
-            st.rerun()
 
     st.title('New Chat')
     model_options = [model.alias for model in model_repository.models]
@@ -37,7 +35,7 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     selected_model_alias = st.selectbox('Model', model_options, key='select_model_dropdown', index=selected_model_index)
     if old_selected_model_alias != selected_model_alias:
         model_repository.set_last_used_model_alias(selected_model_alias)
-        st.rerun()
+        # st.rerun()
     model = model_repository.get_model_by_alias(selected_model_alias)
 
     session = None
@@ -46,11 +44,9 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     button_title = "Send" if st.session_state['nc_chat_token_count'] is None \
         else f"Send ({st.session_state['nc_chat_token_count']} tokens)"
 
-    def on_prompt_change():
-        st.session_state['nc_submitted'] = True
 
-    prompt = st.text_area('Prompt', key='prompt_text_area', on_change=on_prompt_change)
-    if st.button(button_title, type="primary") or st.session_state['nc_submitted']:
+    prompt = st.text_area('Prompt', key='prompt_text_area')
+    if st.button(button_title, type="primary"):
         if prompt:
             session = session_manager.create_session(model, ' '.join(prompt.split()[:5]))
 
@@ -64,7 +60,6 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
             st.session_state['nc_chat_token_count'] = None
             st.session_state['show_chat_session'] = True
 
-    st.session_state['nc_submitted'] = False
 
     # Return the updated state
     state_update = {
