@@ -7,7 +7,7 @@ from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_el
                            show_stop_generate_chat_input_js, cancel_generation_button_styles)
 
 
-def show_chat_session(chat_session: state.ChatSession, model: state.Model):
+def show_chat_session(chat_session: state.ChatSession):
     if 'generating' not in st.session_state:
         st.session_state['generating'] = False
     if 'token_count' not in st.session_state:
@@ -86,7 +86,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
                 with st.chat_message('assistant', avatar='ui/ai.png'):
                     message_placeholder = st.empty()
                     st.session_state['get_and_display_ai_reply_BREAK'] = False
-                    get_and_display_ai_reply(util.create_client(model), model, chat_session, message_placeholder)
+                    get_and_display_ai_reply(util.create_client(chat_session.model), chat_session.model, chat_session, message_placeholder)
                     st.session_state['generating'] = False
                     st.rerun()
 
@@ -125,7 +125,7 @@ def show_chat_session(chat_session: state.ChatSession, model: state.Model):
             st.rerun()
     with col2:
         if chat_session is not None:
-            model_alias = model.alias if model else "No Model"
+            model_alias = chat_session.model.alias if chat_session.model else "No Model"
             if st.session_state['token_count'] is None:
                 st.session_state['token_count'] = util.num_tokens_from_messages(chat_session.messages)
             if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:

@@ -102,7 +102,7 @@ def show_home(show_logout: callable) -> None:
 
     # Chat session/Dialog
     else:
-        show_chat_session(session, get_model())
+        show_chat_session(session)
 
 
 def apply_to_st_session(state_updates):
