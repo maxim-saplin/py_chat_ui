@@ -2,7 +2,7 @@ streamlit==1.37.1
 streamlit-option-menu==0.3.12
 openai==1.42.0
 python-dotenv==1.0.0
-tiktoken==0.5.2
+tiktoken==0.7.0
 cryptography==41.0.7
 PyJWT==2.8.0
 bcrypt==4.0.1
