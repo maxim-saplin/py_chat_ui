@@ -157,3 +157,4 @@ cython_debug/
 .DS_Store
 .aider*
 /default-venv
+chatdata_prod.zip
