@@ -1,6 +1,6 @@
 import streamlit as st
 from logic.user_state import ModelRepository, ChatSessionManager
-from logic.utility import num_tokens_from_messages
+from logic.utility import num_tokens_from_messages, get_tokenizer
 from ui.ui_helpers import new_chat_add_command_enter_handler, hide_tokenzer_workaround_form, new_chat_calculate_tokens, \
     new_chat_collapse_markdown_hidden_elements
 
@@ -18,15 +18,16 @@ def start_new_chat(model_repository: ModelRepository, session_manager: ChatSessi
     if 'nc_prompt_for_tokenizer' not in st.session_state:
         st.session_state['nc_prompt_for_tokenizer'] = None
 
-    # Hidden elements to trigger server side counting of token in chat input
+    model = model_repository.get_last_used_model()
     with st.form("hidden"):
         txt = st.text_area("tokenizer").strip()
         st.form_submit_button("Submit")
         if txt != st.session_state['nc_prompt_for_tokenizer'] \
                 and not (txt == '' and st.session_state['nc_prompt_for_tokenizer'] is None):
             st.session_state['nc_prompt_for_tokenizer'] = None if txt == '' else txt
+            tokenizer = get_tokenizer(model.tokenizer_kind)
             st.session_state['nc_chat_token_count'] = None if st.session_state['nc_prompt_for_tokenizer'] is None \
-                else num_tokens_from_messages([{'role': 'User', 'content': txt}])
+                else num_tokens_from_messages([{'role': 'User', 'content': txt}], tokenizer)
 
     st.title('New Chat')
     model_options = [model.alias for model in model_repository.models]

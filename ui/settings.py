@@ -71,7 +71,9 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
                             selected_model.temperature if selected_model else 0.7, 0.01,
                             disabled=is_env_model or is_fake_type)
 
-    # Validation summary
+    tokenizer_options = ["cl100k_base", "o200k_base"]
+    tokenizer_index = tokenizer_options.index(selected_model.tokenizer_kind) if selected_model else 0
+    tokenizer_kind = st.selectbox('Tokenizer Kind', tokenizer_options, index=tokenizer_index, disabled=is_env_model or is_fake_type)
     errors = []
     if not model_or_deployment_name and not is_env_model and is_new_model:
         errors.append('Model Name is required.')
@@ -95,7 +97,7 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
                     if selected_model_alias in get_model_options():
                         raise ValueError(f"The model alias '{selected_model_alias}' already exists.")
                     model = state.Model(selected_model_alias, model_or_deployment_name,
-                                        api_key, api_type, api_version, api_base, temperature)
+                                        api_key, api_type, api_version, api_base, temperature, tokenizer_kind)
                     state.model_repository.add(model)
                     st.success('Model added successfully!')
                     selected_model_alias = model.alias

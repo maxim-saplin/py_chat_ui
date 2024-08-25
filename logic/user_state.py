@@ -21,6 +21,7 @@ class Model:
                  api_version: str | None,
                  api_base: str | None,
                  temperature: float,
+                 tokenizer_kind: str = "cl100k_base",
                  is_env: bool = False):
         self.alias = alias
         self.model_or_deployment_name = model_or_deployment_name
@@ -29,6 +30,7 @@ class Model:
         self.api_version = api_version
         self.api_base = api_base
         self.temperature = temperature
+        self.tokenizer_kind = tokenizer_kind
         self.is_env = is_env
 
     @property
@@ -102,6 +104,16 @@ class Model:
         self._temperature = value
 
     @property
+    def tokenizer_kind(self):
+        return self._tokenizer_kind
+
+    @tokenizer_kind.setter
+    def tokenizer_kind(self, value):
+        if not isinstance(value, str):
+            raise TypeError("Expected tokenizer_kind to be a string")
+        self._tokenizer_kind = value
+
+    @property
     def is_env(self):
         return self._is_env
 
@@ -125,8 +137,12 @@ class ModelRepository:
                     self.models = []
                     self.last_used_model = ""
                 else:
-                    self.models, \
-                        self.last_used_model = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                    models_data, self.last_used_model = pickle.loads(decrypt_data(encrypted_data, encryption_key))
+                    # Ensure backward compatibility
+                    for model_data in models_data:
+                        if not hasattr(model_data, 'tokenizer_kind'):
+                            model_data.tokenizer_kind = "cl100k_base"
+                    self.models = models_data
         except FileNotFoundError:
             pass
         except InvalidToken:

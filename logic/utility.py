@@ -16,16 +16,18 @@ def create_client(model: Model):
         return OpenAI(api_key=model.api_key, base_url=base_url)
 
 
-encoding = None
-
-
-def num_tokens_from_messages(messages: list[dict]) -> int:
-    """Return the number of tokens used by a list of messages."""
+def get_tokenizer(tokenizer_kind: str):
     import tiktoken
-    global encoding
+    if tokenizer_kind == "cl100k_base":
+        return tiktoken.get_encoding("cl100k_base")
+    elif tokenizer_kind == "o200k_base":
+        return tiktoken.get_encoding("o200k_base")
+    else:
+        raise ValueError(f"Unsupported tokenizer kind: {tokenizer_kind}")
 
-    if not encoding:
-        encoding = tiktoken.get_encoding("cl100k_base")
+
+def num_tokens_from_messages(messages: list[dict], tokenizer) -> int:
+    """Return the number of tokens used by a list of messages."""
 
     if not messages:
         return 0
@@ -37,7 +39,7 @@ def num_tokens_from_messages(messages: list[dict]) -> int:
     for message in messages:
         num_tokens += tokens_per_message
         for key, value in message.items():
-            num_tokens += len(encoding.encode(value))
+            num_tokens += len(tokenizer.encode(value))
             if key == "name":
                 num_tokens += tokens_per_name
     num_tokens += 3  # every reply is primed with <|im_start|>assistant<|im_sep|>
