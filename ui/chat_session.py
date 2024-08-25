@@ -108,7 +108,7 @@ def show_chat_session(chat_session: state.ChatSession):
                 if txt != st.session_state['prompt_for_tokenizer'] \
                         and not (txt == '' and st.session_state['prompt_for_tokenizer'] is None):
                     st.session_state['prompt_for_tokenizer'] = None if txt == '' else txt
-                    st.rerun()
+                    # st.rerun()
             embed_chat_input_tokenizer()
 
     show_stop_generate_chat_input_js()
