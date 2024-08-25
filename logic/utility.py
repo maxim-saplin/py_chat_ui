@@ -16,12 +16,12 @@ def create_client(model: Model):
         return OpenAI(api_key=model.api_key, base_url=base_url)
 
 
-def get_tokenizer(tokenizer_kind: str):
+def get_tokenizer(tokenizer_kind: env_vars.TokenizerKind):
     import tiktoken
-    if tokenizer_kind == "cl100k_base":
-        return tiktoken.get_encoding("cl100k_base")
-    elif tokenizer_kind == "o200k_base":
-        return tiktoken.get_encoding("o200k_base")
+    if tokenizer_kind == env_vars.TokenizerKind.CL100K_BASE:
+        return tiktoken.get_encoding(env_vars.TokenizerKind.CL100K_BASE.value)
+    elif tokenizer_kind == env_vars.TokenizerKind.O200K_BASE:
+        return tiktoken.get_encoding(env_vars.TokenizerKind.O200K_BASE.value)
     else:
         raise ValueError(f"Unsupported tokenizer kind: {tokenizer_kind}")
 

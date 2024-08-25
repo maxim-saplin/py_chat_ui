@@ -67,13 +67,15 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
     api_version = st.text_input('API Version (e.g. "2023-07-01-preview")',
                                 selected_model.api_version if selected_model else '',
                                 disabled=is_env_model or is_openai_type or is_fake_type)
+    
+    tokenizer_options = [tk.value for tk in env_vars.TokenizerKind]
+    tokenizer_index = tokenizer_options.index(selected_model.tokenizer_kind) if selected_model else 0
+    tokenizer_kind = st.selectbox('Tokenizer Kind', tokenizer_options, index=tokenizer_index, disabled=is_env_model or is_fake_type)
+
     temperature = st.slider('Temperature', 0.0, 1.0,
                             selected_model.temperature if selected_model else 0.7, 0.01,
                             disabled=is_env_model or is_fake_type)
 
-    tokenizer_options = ["cl100k_base", "o200k_base"]
-    tokenizer_index = tokenizer_options.index(selected_model.tokenizer_kind) if selected_model else 0
-    tokenizer_kind = st.selectbox('Tokenizer Kind', tokenizer_options, index=tokenizer_index, disabled=is_env_model or is_fake_type)
     errors = []
     if not model_or_deployment_name and not is_env_model and is_new_model:
         errors.append('Model Name is required.')
@@ -118,6 +120,7 @@ def manage_models(model_repository: state.ModelRepository) -> dict:
                         selected_model.api_version = api_version
                         selected_model.api_base = api_base
                         selected_model.temperature = temperature
+                        selected_model.tokenizer_kind = tokenizer_kind
                         state.model_repository.update(old_alias, selected_model)
                         selected_model_alias = selected_model.alias
                         st.success('Model updated successfully!')

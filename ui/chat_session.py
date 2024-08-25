@@ -2,6 +2,7 @@ import streamlit as st
 import logic.user_state as state
 import logic.utility as util
 from logic.utility import get_tokenizer
+from logic import env_vars
 from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_elements, right_align_2nd_col_tokenizer,
                            show_cancel_generate_button_js, set_chat_input_text,
                            embed_chat_input_tokenizer, hide_tokenzer_workaround_form,
@@ -129,7 +130,7 @@ def show_chat_session(chat_session: state.ChatSession):
         if chat_session is not None:
             model_alias = chat_session.model.alias if chat_session.model else "No Model"
             if st.session_state['token_count'] is None:
-                tokenizer = get_tokenizer(chat_session.model.tokenizer_kind)
+                tokenizer = get_tokenizer(env_vars.TokenizerKind(chat_session.model.tokenizer_kind))
                 st.session_state['token_count'] = util.num_tokens_from_messages(chat_session.messages, tokenizer)
             if 'prompt_for_tokenizer' in st.session_state and st.session_state['prompt_for_tokenizer']:
                 prompt_tokens = util.num_tokens_from_messages(

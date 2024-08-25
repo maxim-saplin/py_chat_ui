@@ -164,7 +164,8 @@ class ModelRepository:
                       env_api_version,
                       env_api_base,
                       env_temperature,
-                      True)
+                      tokenizer_kind="cl100k_base",
+                      is_env=True)
         self.models = [m for m in self.models if not m.is_env]
 
         self.models.insert(0, model)
@@ -365,7 +366,7 @@ class ChatSessionManager:
                 os.remove(session.messages_file_path)
 
 
-model_repository: ModelRepository = None
+model_repository: ModelRepository = ModelRepository()
 session_manager: ChatSessionManager = None
 
 
@@ -386,7 +387,7 @@ def init(username: str, enc_key) -> None:
         raise ValueError("Encryption key is not set.")
     user_dir = escape_username(username)
     encryption_key = enc_key
-    model_repository = ModelRepository()
+    model_repository.load()
     model_repository.load()
     if env_vars.env_model_alias and env_vars.env_api_type != env_vars.ApiTypeOptions.EMPTY:
         model_repository.add_env(env_vars.env_model_alias, env_vars.env_model_name, env_vars.env_api_key,

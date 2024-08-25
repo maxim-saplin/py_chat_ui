@@ -14,6 +14,23 @@ class ApiTypeOptions(Enum):
     FAKE = 'Fake'
     EMPTY = 'Empty'
 
+class ApiTypeOptions(Enum):
+    AZURE = 'Azure'
+    OPENAI = 'OpenAI'
+    FAKE = 'Fake'
+    EMPTY = 'Empty'
+
+    @classmethod
+    def from_string(cls, api_type_str: str):
+        for member in cls:
+            if member.value == api_type_str:
+                return member
+        return None
+
+class TokenizerKind(Enum):
+    CL100K_BASE = 'cl100k_base'
+    O200K_BASE = 'o200k_base'
+
     @classmethod
     def from_string(cls, api_type_str: str):
         for member in cls:
