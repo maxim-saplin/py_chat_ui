@@ -6,6 +6,7 @@ from ui.ui_helpers import (chat_bottom_padding, chat_collapse_markdown_hidden_el
                            show_cancel_generate_button_js, set_chat_input_text,
                            embed_chat_input_tokenizer, hide_tokenzer_workaround_form,
                            show_stop_generate_chat_input_js, cancel_generation_button_styles)
+from logic.user_state import model_repository
 
 
 def show_chat_session(chat_session: state.ChatSession):
