@@ -3,17 +3,21 @@ from streamlit.components.v1 import html
 
 
 def global_ui_tweaks():
-    st.write("""
+    st.write(
+        """
     <style>
         header[data-testid="stHeader"] {
             visibility: hidden;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def register_button_as_link():
-    st.write("""
+    st.write(
+        """
     <style>
         div.row-widget button[kind="secondary"] {
             text-decoration: underline;
@@ -22,11 +26,14 @@ def register_button_as_link():
             background-color: transparent;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def sidebar_about_link():
-    st.write("""
+    st.write(
+        """
     <style>
         div[data-testid="stSidebarUserContent"] div.element-container:last-child  {
             position: fixed;
@@ -36,11 +43,14 @@ def sidebar_about_link():
             -webkit-backdrop-filter: blur(15px);
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def login_background():
-    st.write("""
+    st.write(
+        """
     <style>
         div.stApp {
             background: repeating-linear-gradient(
@@ -57,11 +67,14 @@ def login_background():
             box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def right_align_2nd_col_tokenizer():
-    st.write("""
+    st.write(
+        """
     <style>
         div[data-testid="column"]:nth-of-type(2) p {
             font-family: monospace;
@@ -91,41 +104,50 @@ def right_align_2nd_col_tokenizer():
             }
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def hide_streamlit_toolbar():
     """
     Running man at the top right corner when a request is executed
     """
-    st.write("""
+    st.write(
+        """
     <style>
         div[data-testid="stToolbar"] {
             display: none;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def add_theme_customizations():
     """
     Adjusting those styles that were not possible to be changed in config.toml
     """
-    st.write("""
+    st.write(
+        """
 
     <style>
         div.stChatMessage p{
             font-family: sans-serif;
         }
     </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def hide_streamlit_menu():
     """
     Deply, Three Dots button, as well as Made with Streamlit at the bottom
     """
-    st.write("""
+    st.write(
+        """
     <style>
         .reportview-container {
             margin-top: -2em;
@@ -135,11 +157,14 @@ def hide_streamlit_menu():
         footer {visibility: hidden;}
         #stDecoration {display:none;}
     </style>
-""", unsafe_allow_html=True)
+""",
+        unsafe_allow_html=True,
+    )
 
 
 def hide_tokenzer_workaround_form():
-    st.write("""
+    st.write(
+        """
     <style>
         div[data-testid="stForm"] {
             height: 0px;
@@ -154,50 +179,77 @@ def hide_tokenzer_workaround_form():
             height: 0;
         }
     </style>
-""", unsafe_allow_html=True)
+""",
+        unsafe_allow_html=True,
+    )
+
+
+# def hide_chat_input():
+#     st.write(
+#         """
+#         <style>
+#             textarea[data-testid="stChatInputTextArea"] {
+#                 display: none;
+#             }
+#         </style>
+#     """,
+#         unsafe_allow_html=True,
+#     )
 
 
 def new_chat_collapse_markdown_hidden_elements():
-    st.write("""
+    st.write(
+        """
         <style>
             section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
                 margin-top: -150px;
                 margin-bottom: -80px;
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def new_chat_calculate_tokens():
-    embed_chat_tokenizer_js('section[tabindex="0"] textarea[aria-label="Prompt"]',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer"]',
-                            1500)
+    embed_chat_tokenizer_js(
+        'section[tabindex="0"] textarea[aria-label="Prompt"]',
+        'section[tabindex="0"] textarea[aria-label="tokenizer"]',
+        1500,
+    )
 
 
 def settings_collapse_markdown_hidden_elements():
-    st.write("""
+    st.write(
+        """
         <style>
             section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
                 margin-top: -80px;
                 margin-bottom: -100px;
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def chat_collapse_markdown_hidden_elements():
-    st.write("""
+    st.write(
+        """
         <style>
             section[tabindex="0"]>div>div>div>div[data-testid="stVerticalBlock"] {
                 margin-top: -100px;
                 margin-bottom: -80px;
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def chat_bottom_padding():
-    st.write("""
+    st.write(
+        """
         <style>
             div.stChatFloatingInputContainer {
                 padding-bottom: 30px;
@@ -209,14 +261,17 @@ def chat_bottom_padding():
                 # padding: none;
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
 def cancel_generation_button_styles():
     """
     And hide generation button
     """
-    st.write("""
+    st.write(
+        """
         <style>
             div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton {
                 text-align: center;
@@ -227,10 +282,12 @@ def cancel_generation_button_styles():
                 background-color: transparent;
             }
         </style>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
 
 
-stop_button_selector =\
+stop_button_selector = \
     'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton'
 
 
@@ -243,7 +300,7 @@ def show_cancel_generate_button_js():
 console.log("show_generate_button_js");
 const stopButton = window.parent.document.querySelector('{stop_button_selector}');
 stopButton.style.visibility = 'visible';
-const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
+const chatInputContainer = window.parent.document.querySelector('div.stChatInput');
 chatInputContainer.style.visibility = 'hidden';
 </script>
     """
@@ -256,7 +313,7 @@ def show_stop_generate_chat_input_js():
 console.log("show_generate_chat_input_js");
 const stopButton = window.parent.document.querySelector('{stop_button_selector}');
 if (stopButton) stopButton.style.visibility = 'hidden';
-const chatInputContainer = window.parent.document.querySelector('div.stChatInputContainer');
+const chatInputContainer = window.parent.document.querySelector('div.stChatInput');
 if (chatInputContainer) chatInputContainer.style.visibility = 'visible';
 </script>
     """
@@ -264,11 +321,11 @@ if (chatInputContainer) chatInputContainer.style.visibility = 'visible';
 
 
 def set_chat_input_text(promptText: str):
-    escaped_prompt_text = promptText.replace('`', '\\`').replace('\n', '\\n')
-# !!! Since react controls state, simle DOM values setting won't work, goind the hard way of simulating user interaction
+    escaped_prompt_text = promptText.replace("`", "\\`").replace("\n", "\\n")
+    # !!! Since react controls state, simle DOM values setting won't work, goind the hard way of simulating user interaction
     js = f"""
 <script>
-const chatInput = window.parent.document.querySelector('.stChatInputContainer textarea');
+const chatInput = window.parent.document.querySelector('.stChatInput textarea');
 const nativeTextAreaValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value").set;
 nativeTextAreaValueSetter.call(chatInput, `{escaped_prompt_text}`);
 const event = new Event('input', {{ bubbles: true }});
@@ -279,25 +336,40 @@ chatInput.dispatchEvent(event);
 
 
 def embed_chat_input_tokenizer():
-    embed_chat_tokenizer_js('textarea[placeholder="What is up?"]',
-                            'section[tabindex="0"] textarea[aria-label="tokenizer2"]', 1500,
-                            stop_button_selector,
-                            '.stChatInputContainer button')
+    embed_chat_tokenizer_js(
+        'textarea[placeholder="What is up?"]',
+        'section[tabindex="0"] textarea[aria-label="tokenizer2"]',
+        1500,
+        stop_button_selector,
+        ".stChatInput button",
+    )
 
 
-def embed_chat_tokenizer_js(srcSelector: str, dstSelector: str, debounceTimeout: int = 800, cancelSelector: str = "",
-                            submitButtonSelector: str = ""):
+def embed_chat_tokenizer_js(
+    srcSelector: str,
+    dstSelector: str,
+    debounceTimeout: int = 800,
+    cancelSelector: str = "",
+    submitButtonSelector: str = "",
+):
     """
     cancelSelector - if present in DOM, no action will take place
     submitButtonSelector - when pressed, no action will take place after (if timer hits)
     """
-    js = """
+    js = (
+        """
 <script>
 setTimeout(() => {
     let previousValue = '';
-    const originalTextArea = window.parent.document.querySelector('""" + srcSelector + """');
-    const formTextArea = window.parent.document.querySelector('""" + dstSelector + """');
-    buttonSelector = '""" + submitButtonSelector + """';
+    const originalTextArea = window.parent.document.querySelector('"""
+        + srcSelector
+        + """');
+    const formTextArea = window.parent.document.querySelector('"""
+        + dstSelector
+        + """');
+    buttonSelector = '"""
+        + submitButtonSelector
+        + """';
     const button = buttonSelector ? window.parent.document.querySelector(buttonSelector) : null;
 
     if (button) {
@@ -324,7 +396,9 @@ setTimeout(() => {
                     previousValue = formTextArea.value;
 
                     setTimeout(() => {
-                        selector = '""" + cancelSelector + """';
+                        selector = '"""
+        + cancelSelector
+        + """';
                         const cancelElement = selector ? window.parent.document.querySelector(selector) : null;
                         let computedStyle = null;
                         if (cancelElement) {
@@ -346,7 +420,9 @@ setTimeout(() => {
 
                     }, 100);
                 }
-            },""" + str(debounceTimeout) + """);
+            },"""
+        + str(debounceTimeout)
+        + """);
         });
         console.log("Prompt input handler is active");
     }
@@ -356,20 +432,23 @@ setTimeout(() => {
 }, 150);
 </script>
 """
+    )
     html(js, 0, 0, False)
 
+
 def new_chat_add_command_enter_handler():
-   js = """
+    js = """
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const promptTextArea = window.parent.document.querySelector('textarea[aria-label="Prompt"]');
-    
+
 
     if (promptTextArea) {
         promptTextArea.addEventListener('keydown', (event) => {
             if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
                 setTimeout(() => {
-                    const primaryButton = window.parent.document.querySelector('button[kind="primary"][data-testid="baseButton-primary"]');
+                    const primaryButton = window.parent.document.querySelector
+                        ('button[kind="primary"][data-testid="baseButton-primary"]');
                     primaryButton.dispatchEvent(new MouseEvent('click', { bubbles: true }));
                     console.log(primaryButton)
                     console.log("Cmd/Ctrl + Enter pressed, button clicked");
@@ -382,5 +461,4 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 </script>
 """
-   html(js, 0, 0, False)
-
+    html(js, 0, 0, False)
