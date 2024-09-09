@@ -1,3 +1,4 @@
+import time
 import streamlit as st
 import logic.user_state as state
 import logic.utility as util
@@ -11,32 +12,14 @@ from ui.ui_helpers import (
     embed_chat_input_tokenizer,
     hide_tokenzer_workaround_form,
     show_stop_generate_chat_input_js,
-    cancel_generation_button_styles
+    cancel_generation_button_styles,
 )
 
 
 def show_chat_session(chat_session: state.ChatSession):
-    if "generating" not in st.session_state:
-        st.session_state["generating"] = False
-    if "token_count" not in st.session_state:
-        st.session_state["token_count"] = None
-    if "prompt_for_tokenizer" not in st.session_state:
-        st.session_state["prompt_for_tokenizer"] = None
-    if "canceled_prompt" not in st.session_state:
-        st.session_state["canceled_prompt"] = None
-    if "get_and_display_ai_reply_BREAK" not in st.session_state:
-        st.session_state["get_and_display_ai_reply_BREAK"] = False
-    if "prev_chat_session" not in st.session_state:
-        st.session_state["prev_chat_session"] = None
-
-    if chat_session != st.session_state["prev_chat_session"]:
-        st.session_state["token_count"] = (
-            None  # if a new chat session is open - recalculate messages size
-        )
-        st.session_state["prev_chat_session"] = chat_session
+    init_session_state(chat_session)
 
     hide_tokenzer_workaround_form()
-    # chat_bottom_padding()
     chat_collapse_markdown_hidden_elements()
     cancel_generation_button_styles()
     right_align_2nd_col_tokenizer()
@@ -61,7 +44,6 @@ def show_chat_session(chat_session: state.ChatSession):
             if st.button("Cancel generation"):
                 st.session_state["generating"] = False
                 st.session_state["get_and_display_ai_reply_BREAK"] = True
-                st.session_state["generating"] = False
                 try:
                     st.session_state["canceled_prompt"] = chat_session.messages[-1][
                         "content"
@@ -153,37 +135,108 @@ def show_chat_session(chat_session: state.ChatSession):
             st.session_state["get_and_display_ai_reply_BREAK"] = True
             st.session_state["generating"] = False
             st.rerun()
+
+    # Stats, top right corners
     with col2:
-        if chat_session is not None:
-            model_alias = chat_session.model.alias if chat_session.model else "No Model"
-            if st.session_state["token_count"] is None:
-                tokenizer = get_tokenizer(
-                    env_vars.TokenizerKind(chat_session.model.tokenizer_kind)
+        display_stats(chat_session)
+
+
+def display_stats(chat_session):
+    if chat_session is not None:
+        model_alias = chat_session.model.alias if chat_session.model else "No Model"
+        tokenizer = get_tokenizer(
+            env_vars.TokenizerKind(chat_session.model.tokenizer_kind)
+        )
+        stats = ""
+        if st.session_state["token_count"] is None:
+            st.session_state["token_count"] = util.num_tokens_from_messages(
+                chat_session.messages, tokenizer
+            )
+        if (
+            "prompt_for_tokenizer" in st.session_state
+            and st.session_state["prompt_for_tokenizer"]
+        ):
+            prompt_tokens = util.num_tokens_from_messages(
+                [
+                    {
+                        "role": "User",
+                        "content": st.session_state["prompt_for_tokenizer"],
+                    }
+                ],
+                tokenizer,
+            )
+        else:
+            prompt_tokens = 0
+        if prompt_tokens > 0:
+            stats += f"{model_alias} / {st.session_state['token_count'] } ttl tokens +{prompt_tokens}"
+        else:
+            stats += f"{model_alias} / {st.session_state['token_count']} ttl tokens"
+
+            # Performance metrics
+        if st.session_state["time_to_first_chunk"] and st.session_state["total_time"]:
+            # Network time is included, first chunk tokens generation time is also included
+            time_to_first_chunk = st.session_state["time_to_first_chunk"]
+            total_time = st.session_state["total_time"]
+            tokens_last_message = util.num_tokens_from_messages(
+                [st.session_state.get("last_message")], tokenizer
+            )
+            # First chunk is not a full message
+            tokens_first_chunk = (
+                util.num_tokens_from_messages(
+                    [st.session_state.get("first_chunk")], tokenizer
                 )
-                st.session_state["token_count"] = util.num_tokens_from_messages(
-                    chat_session.messages, tokenizer
-                )
-            if (
-                "prompt_for_tokenizer" in st.session_state
-                and st.session_state["prompt_for_tokenizer"]
-            ):
-                prompt_tokens = util.num_tokens_from_messages(
-                    [
-                        {
-                            "role": "User",
-                            "content": st.session_state["prompt_for_tokenizer"],
-                        }
-                    ],
-                    tokenizer,
-                )
-            else:
-                prompt_tokens = 0
-            if prompt_tokens > 0:
-                st.write(
-                    f"{model_alias} / {st.session_state['token_count'] } +{prompt_tokens}"
-                )
-            else:
-                st.write(f"{model_alias} / {st.session_state['token_count'] }")
+                - 4
+            )
+            token_count = tokens_last_message - tokens_first_chunk
+            tokens_per_second = (
+                (token_count / total_time if total_time > 0 else float("inf"))
+                if token_count is not None
+                else None
+            )
+
+            stats += (
+                f"  \nTTF Chunk: {time_to_first_chunk:.2f}s / "
+                if time_to_first_chunk
+                else "TTF Chunk: N/A /"
+            )
+            stats += f"TPS: {tokens_per_second:.2f}" if total_time else "TPS: N/A"
+
+        st.write(stats)
+
+
+def init_session_state(chat_session):
+    if "generating" not in st.session_state:
+        st.session_state["generating"] = False
+    if "token_count" not in st.session_state:
+        st.session_state["token_count"] = None
+    if "prompt_for_tokenizer" not in st.session_state:
+        st.session_state["prompt_for_tokenizer"] = None
+    if "canceled_prompt" not in st.session_state:
+        st.session_state["canceled_prompt"] = None
+    if "get_and_display_ai_reply_BREAK" not in st.session_state:
+        st.session_state["get_and_display_ai_reply_BREAK"] = False
+    if "prev_chat_session" not in st.session_state:
+        st.session_state["prev_chat_session"] = None
+    if "time_to_first_chunk" not in st.session_state:
+        st.session_state["time_to_first_chunk"] = None
+    if "last_message" not in st.session_state:
+        st.session_state["last_message"] = None
+    if "first_chunk" not in st.session_state:
+        st.session_state["first_chunk"] = None
+    if "total_time" not in st.session_state:
+        st.session_state["total_time"] = None
+
+    # if a new chat session is open - reset state
+    if (
+        not st.session_state["prev_chat_session"]
+        or chat_session.file_path != st.session_state["prev_chat_session"].file_path
+    ):
+        st.session_state["token_count"] = None
+        st.session_state["time_to_first_chunk"] = None
+        st.session_state["last_message"] = None
+        st.session_state["first_chunk"] = None
+        st.session_state["total_time"] = None
+        st.session_state["prev_chat_session"] = chat_session
 
 
 def get_and_display_ai_reply(
@@ -196,6 +249,10 @@ def get_and_display_ai_reply(
         full_response = ""
         message_placeholder.markdown("...")
 
+        start_time = time.time()
+        first_chunk_time = None
+        first_chunk = None
+
         for response in client.chat.completions.create(
             model=model.model_or_deployment_name,
             temperature=model.temperature,
@@ -204,6 +261,8 @@ def get_and_display_ai_reply(
                 for m in chat_session.messages
             ],
             stream=True,
+            # stream_options={"include_usage": True},
+            # Doesn't work for Azure https://github.com/Azure/azure-sdk-for-net/issues/44237
         ):
             if response.choices:
                 if st.session_state["get_and_display_ai_reply_BREAK"]:
@@ -215,14 +274,32 @@ def get_and_display_ai_reply(
                     and first_choice.delta
                     and first_choice.delta.content
                 ):
+                    if first_chunk_time is None:
+                        first_chunk_time = time.time()
+                        first_chunk = first_choice.delta.content
                     full_response += first_choice.delta.content
                 elif hasattr(first_choice, "content") and first_choice.content:
                     full_response = first_choice.content
+            # if response.usage:
+            #     token_count = response.usage.completion_tokens
             message_placeholder.markdown(full_response + "▌")
+        end_time = time.time()
+
         message_placeholder.markdown(full_response)
+        message = {"role": "assistant", "content": full_response}
         if not st.session_state["get_and_display_ai_reply_BREAK"]:
-            chat_session.add_message({"role": "assistant", "content": full_response})
+            chat_session.add_message(message)
         print("get_and_display_ai_reply - completing")
-        return full_response
+
+        time_to_first_chunk = (
+            first_chunk_time - start_time if first_chunk_time else None
+        )
+        total_time = end_time - first_chunk_time if first_chunk_time else None
+
+        st.session_state["time_to_first_chunk"] = time_to_first_chunk
+        st.session_state["last_message"] = message
+        st.session_state["first_chunk"] = {"role": "assistant", "content": first_chunk}
+        st.session_state["total_time"] = total_time
+
     finally:
         st.session_state["get_and_display_ai_reply_BREAK"] = False

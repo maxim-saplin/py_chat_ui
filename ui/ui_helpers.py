@@ -184,19 +184,6 @@ def hide_tokenzer_workaround_form():
     )
 
 
-# def hide_chat_input():
-#     st.write(
-#         """
-#         <style>
-#             textarea[data-testid="stChatInputTextArea"] {
-#                 display: none;
-#             }
-#         </style>
-#     """,
-#         unsafe_allow_html=True,
-#     )
-
-
 def new_chat_collapse_markdown_hidden_elements():
     st.write(
         """
