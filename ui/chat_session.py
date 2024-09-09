@@ -168,9 +168,9 @@ def display_stats(chat_session):
         else:
             prompt_tokens = 0
         if prompt_tokens > 0:
-            stats += f"{model_alias} / {st.session_state['token_count'] } ttl tokens +{prompt_tokens}"
+            stats += f"{model_alias} / {st.session_state['token_count'] } tokens +{prompt_tokens}"
         else:
-            stats += f"{model_alias} / {st.session_state['token_count']} ttl tokens"
+            stats += f"{model_alias} / {st.session_state['token_count']} tokens"
 
             # Performance metrics
         if st.session_state["time_to_first_chunk"] and st.session_state["total_time"]:
@@ -205,26 +205,22 @@ def display_stats(chat_session):
 
 
 def init_session_state(chat_session):
-    if "generating" not in st.session_state:
-        st.session_state["generating"] = False
-    if "token_count" not in st.session_state:
-        st.session_state["token_count"] = None
-    if "prompt_for_tokenizer" not in st.session_state:
-        st.session_state["prompt_for_tokenizer"] = None
-    if "canceled_prompt" not in st.session_state:
-        st.session_state["canceled_prompt"] = None
-    if "get_and_display_ai_reply_BREAK" not in st.session_state:
-        st.session_state["get_and_display_ai_reply_BREAK"] = False
-    if "prev_chat_session" not in st.session_state:
-        st.session_state["prev_chat_session"] = None
-    if "time_to_first_chunk" not in st.session_state:
-        st.session_state["time_to_first_chunk"] = None
-    if "last_message" not in st.session_state:
-        st.session_state["last_message"] = None
-    if "first_chunk" not in st.session_state:
-        st.session_state["first_chunk"] = None
-    if "total_time" not in st.session_state:
-        st.session_state["total_time"] = None
+    session_state_defaults = {
+        "generating": False,
+        "token_count": None,
+        "prompt_for_tokenizer": None,
+        "canceled_prompt": None,
+        "get_and_display_ai_reply_BREAK": False,
+        "prev_chat_session": None,
+        "time_to_first_chunk": None,
+        "last_message": None,
+        "first_chunk": None,
+        "total_time": None,
+    }
+
+    for key, default_value in session_state_defaults.items():
+        if key not in st.session_state:
+            st.session_state[key] = default_value
 
     # if a new chat session is open - reset state
     if (

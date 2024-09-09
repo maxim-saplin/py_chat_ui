@@ -1,5 +1,5 @@
 streamlit==1.37.1
-streamlit-option-menu==0.3.12
+streamlit-option-menu==0.3.13
 openai==1.42.0
 python-dotenv==1.0.0
 tiktoken==0.7.0

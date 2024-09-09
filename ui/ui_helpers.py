@@ -78,6 +78,7 @@ def right_align_2nd_col_tokenizer():
     <style>
         div[data-testid="column"]:nth-of-type(2) p {
             font-family: monospace;
+            font-size: 13px;
             text-align: end;
             position: fixed;
             z-index: 999;
