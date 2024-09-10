@@ -1,4 +1,4 @@
-__version__ = '0.2.24'
+__version__ = "0.3.0"
 
 import streamlit as st
 from logic.user_state import init
@@ -10,12 +10,9 @@ import time
 # print('Py Chat, Request received')
 start_time = time.time()
 
-st.set_page_config(
-    page_title='Py Chat',
-    page_icon='ui/icon.png'
-)
+st.set_page_config(page_title="Py Chat", page_icon="ui/icon.png")
 
-st.session_state['version'] = __version__
+st.session_state["version"] = __version__
 
 hide_streamlit_menu()
 hide_streamlit_toolbar()
@@ -28,8 +25,8 @@ if auth := authenticate():
             init(user, get_enc_key())
             show_home(lambda: show_logout(auth))
         except Exception as e:
-            st.error(f'Error in the main loop: {e}')
-            show_logout(auth, key='main_logout')
+            st.error(f"Error in the main loop: {e}")
+            show_logout(auth, key="main_logout")
             raise e
 
-print(f'Py Chat, Request done in {(time.time() - start_time) * 1000:.2f} ms')
+print(f"Py Chat, Request done in {(time.time() - start_time) * 1000:.2f} ms")
