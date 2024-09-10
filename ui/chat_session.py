@@ -57,8 +57,9 @@ def show_chat_session(chat_session: state.ChatSession):
                     ),
                 ):
                     st.markdown(message["content"])
-                    if st.button("❌", key=f"delete_{i}"):
-                        confirm_delete(i)
+                    if message["role"] != "system":
+                        if st.button("␡", key=f"delete_{i}"):
+                            confirm_delete(i)
 
         # Handle deletion if confirmed
         if "delete_confirmed" in st.session_state:

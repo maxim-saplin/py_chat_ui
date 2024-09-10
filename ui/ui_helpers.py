@@ -80,18 +80,22 @@ def right_align_message_delete_button():
         div[data-testid="stChatMessageContent"] div:has(> .stButton) {
             position: absolute;
             left: -100px;
-            top: -5px;
+            top: -13px;
             width: 0px !important;
         }
         div[data-testid="stChatMessageContent"] div.stButton button {
             border: none;
-            opacity: 0.5;
-            background: rgba(0, 0, 0, 0.0);
-            scale: 0.6;
+            opacity: 0.2;
+            background: rgba(127, 127, 127, 0.0);
+            padding: 0;
+            border: 0;
         }
         div[data-testid="stChatMessageContent"] div.stButton button:hover {
             opacity: 1.0;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(127, 127, 127, 0.03);
+        }
+        div[data-testid="stChatMessageContent"] div.stButton button p {
+            font-size: 36px;
         }
 
     </style>
