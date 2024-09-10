@@ -25,11 +25,11 @@ def confirm_delete(message_index):
     col1, col2, _ = st.columns([1, 1, 3])
     with col1:
         if st.button("Yes"):
-            st.session_state.delete_confirmed = message_index
+            st.session_state["delete_confirmed"] = message_index
             st.rerun()
     with col2:
         if st.button("No"):
-            st.session_state.delete_confirmed = None
+            st.session_state["delete_confirmed"] = None
             st.rerun()
 
 
@@ -57,18 +57,19 @@ def show_chat_session(chat_session: state.ChatSession):
                     ),
                 ):
                     st.markdown(message["content"])
-                    if message["role"] != "system":
+                    if message["role"] == "user":
                         if st.button("␡", key=f"delete_{i}"):
                             confirm_delete(i)
 
         # Handle deletion if confirmed
-        if "delete_confirmed" in st.session_state:
+        if st.session_state["delete_confirmed"]:
             index_to_delete = st.session_state.delete_confirmed
             deleted_message = chat_session.messages[index_to_delete]["content"]
-            messages = chat_session.messages
-            chat_session.messages = messages[:index_to_delete]
-            st.session_state["prompt_for_tokenizer"] = deleted_message
-            del st.session_state.delete_confirmed
+            while len(chat_session.messages) > index_to_delete:
+                chat_session.delete_last_message()
+            if deleted_message:
+                st.session_state["canceled_prompt"] = deleted_message
+            st.session_state["delete_confirmed"] = None
             st.rerun()
 
         with st.container():
@@ -250,6 +251,7 @@ def init_session_state(chat_session):
         "last_message": None,
         "first_chunk": None,
         "total_time": None,
+        "delete_confirmed": None,
     }
 
     for key, default_value in session_state_defaults.items():

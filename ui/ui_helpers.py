@@ -80,7 +80,7 @@ def right_align_message_delete_button():
         div[data-testid="stChatMessageContent"] div:has(> .stButton) {
             position: absolute;
             left: -100px;
-            top: -13px;
+            top: -15px;
             width: 0px !important;
         }
         div[data-testid="stChatMessageContent"] div.stButton button {
@@ -104,6 +104,7 @@ def right_align_message_delete_button():
     )
 
 
+# flake8: noqa: e501
 def right_align_2nd_col_tokenizer():
     st.write(
         """
@@ -307,8 +308,7 @@ def cancel_generation_button_styles():
     )
 
 
-stop_button_selector = \
-    'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton'
+stop_button_selector = 'div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton'
 
 
 def show_cancel_generate_button_js():
