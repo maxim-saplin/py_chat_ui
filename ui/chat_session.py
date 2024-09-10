@@ -13,7 +13,24 @@ from ui.ui_helpers import (
     hide_tokenzer_workaround_form,
     show_stop_generate_chat_input_js,
     cancel_generation_button_styles,
+    right_align_message_delete_button,
 )
+
+
+@st.dialog("Confirm deletion")
+def confirm_delete(message_index):
+    st.write(
+        "Are you sure you want to delete this message and all subsequent messages?"
+    )
+    col1, col2, _ = st.columns([1, 1, 3])
+    with col1:
+        if st.button("Yes"):
+            st.session_state.delete_confirmed = message_index
+            st.rerun()
+    with col2:
+        if st.button("No"):
+            st.session_state.delete_confirmed = None
+            st.rerun()
 
 
 def show_chat_session(chat_session: state.ChatSession):
@@ -23,13 +40,14 @@ def show_chat_session(chat_session: state.ChatSession):
     chat_collapse_markdown_hidden_elements()
     cancel_generation_button_styles()
     right_align_2nd_col_tokenizer()
+    right_align_message_delete_button()
 
     # Chat header
     col1, col2 = st.columns(2)
 
     try:
         if chat_session is not None:
-            for message in chat_session.messages:
+            for i, message in enumerate(chat_session.messages):
                 with st.chat_message(
                     message["role"],
                     avatar=(
@@ -39,6 +57,18 @@ def show_chat_session(chat_session: state.ChatSession):
                     ),
                 ):
                     st.markdown(message["content"])
+                    if st.button("❌", key=f"delete_{i}"):
+                        confirm_delete(i)
+
+        # Handle deletion if confirmed
+        if "delete_confirmed" in st.session_state:
+            index_to_delete = st.session_state.delete_confirmed
+            deleted_message = chat_session.messages[index_to_delete]["content"]
+            messages = chat_session.messages
+            chat_session.messages = messages[:index_to_delete]
+            st.session_state["prompt_for_tokenizer"] = deleted_message
+            del st.session_state.delete_confirmed
+            st.rerun()
 
         with st.container():
             if st.button("Cancel generation"):
@@ -128,6 +158,9 @@ def show_chat_session(chat_session: state.ChatSession):
     if st.session_state["canceled_prompt"] not in (None, ""):
         set_chat_input_text(st.session_state["canceled_prompt"])
         st.session_state["canceled_prompt"] = None
+    elif st.session_state["prompt_for_tokenizer"]:
+        set_chat_input_text(st.session_state["prompt_for_tokenizer"])
+        st.session_state["prompt_for_tokenizer"] = None
 
     with col1:
         if st.button("Delete Chat"):
@@ -168,7 +201,7 @@ def display_stats(chat_session):
         else:
             prompt_tokens = 0
         if prompt_tokens > 0:
-            stats += f"{model_alias} / {st.session_state['token_count'] } tokens +{prompt_tokens}"
+            stats += f"{model_alias} / {st.session_state['token_count']} tokens +{prompt_tokens}"
         else:
             stats += f"{model_alias} / {st.session_state['token_count']} tokens"
 

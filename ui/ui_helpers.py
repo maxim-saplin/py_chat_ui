@@ -41,6 +41,7 @@ def sidebar_about_link():
             opacity: 0.5;
             backdrop-filter: blur(15px);
             -webkit-backdrop-filter: blur(15px);
+            width: 200px !important;
         }
     </style>
     """,
@@ -72,11 +73,38 @@ def login_background():
     )
 
 
+def right_align_message_delete_button():
+    st.write(
+        """
+    <style>
+        div[data-testid="stChatMessageContent"] div:has(> .stButton) {
+            position: absolute;
+            left: -100px;
+            top: -5px;
+            width: 0px !important;
+        }
+        div[data-testid="stChatMessageContent"] div.stButton button {
+            border: none;
+            opacity: 0.5;
+            background: rgba(0, 0, 0, 0.0);
+            scale: 0.6;
+        }
+        div[data-testid="stChatMessageContent"] div.stButton button:hover {
+            opacity: 1.0;
+            background: rgba(0, 0, 0, 0.5);
+        }
+
+    </style>
+    """,
+        unsafe_allow_html=True,
+    )
+
+
 def right_align_2nd_col_tokenizer():
     st.write(
         """
     <style>
-        div[data-testid="column"]:nth-of-type(2) p {
+        div[data-testid="column"]:nth-of-type(2)>div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stMarkdown"]>div[data-testid="stMarkdownContainer"]>p {
             font-family: monospace;
             font-size: 13px;
             text-align: end;
@@ -261,7 +289,7 @@ def cancel_generation_button_styles():
     st.write(
         """
         <style>
-            div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"] div.row-widget.stButton {
+            div[data-testid="stVerticalBlock"]>div[data-testid="stVerticalBlockBorderWrapper"]>div>div>div>div.row-widget.stButton {
                 text-align: center;
                 position: fixed;
                 bottom: 31px;
