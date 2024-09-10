@@ -41,7 +41,7 @@ jobs:
 
       - name: Extract version from source code
         run: |
-          VERSION=$(awk 'NR==1 {print $3}' main.py | tr -d "'")
+          VERSION=$(awk 'NR==1 {print $3}' main.py | sed "s/[\"']//g")
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "Extracted version: $VERSION"
   
