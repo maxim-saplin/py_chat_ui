@@ -160,9 +160,9 @@ def show_chat_session(chat_session: state.ChatSession):
     if st.session_state["canceled_prompt"] not in (None, ""):
         set_chat_input_text(st.session_state["canceled_prompt"])
         st.session_state["canceled_prompt"] = None
-    elif st.session_state["prompt_for_tokenizer"]:
-        set_chat_input_text(st.session_state["prompt_for_tokenizer"])
-        st.session_state["prompt_for_tokenizer"] = None
+    # elif st.session_state["prompt_for_tokenizer"]:
+    #     set_chat_input_text(st.session_state["prompt_for_tokenizer"])
+    #     st.session_state["prompt_for_tokenizer"] = None
 
     with col1:
         if st.button("Delete Chat"):
@@ -187,10 +187,7 @@ def display_stats(chat_session):
             st.session_state["token_count"] = util.num_tokens_from_messages(
                 chat_session.messages, tokenizer
             )
-        if (
-            "prompt_for_tokenizer" in st.session_state
-            and st.session_state["prompt_for_tokenizer"]
-        ):
+        if st.session_state["prompt_for_tokenizer"]:
             prompt_tokens = util.num_tokens_from_messages(
                 [
                     {
